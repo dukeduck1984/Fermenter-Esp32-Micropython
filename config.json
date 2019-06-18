@@ -1,0 +1,28 @@
+{
+    "onewire_pin": 25,
+    "cooler_pin": 20,
+    "heater_pin": 23,
+    "rgb_pins": {
+        "r_pin": 13,
+        "g_pin": 14,
+        "b_pin": 15
+    },
+    "oled_i2c_pins": {
+        "scl": 22,
+        "sda": 21
+    },
+    "wort_sensor_dev": 0,
+    "chamber_sensor_dev": 1,
+    "cooler_interval": 300,
+    "heater_interval": 0,
+    "ap_ssid": "Fermenter",
+    "wifi": {
+        "ssid": "28#301",
+        "pass": "50047501"
+    },
+    "fermenting_stages": [
+        [24, 18.5],
+        [288, 19.6],
+        [48, 20.5]
+    ]
+}

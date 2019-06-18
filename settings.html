@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Settings</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+        <h1>Settings</h1>
+        <p>
+        <form>
+            <h3>Sensors</h3>
+            <fieldset>
+                <legend>Temp Sensor</legend>
+                <select name="wort_sensor_dev" id="wort_sensor_dev">
+                    <option value="0">Dev0DeviceID</option>
+                    <option value="1">Dev1DeviceID</option>
+                </select>
+                <button id="test_wort_sensor_btn" type="button">Test</button>
+                <span id="test_wort_temp_result"></span>
+                <p>
+                Chamber Temp Sensor<br/>
+                <select name="chamber_sensor_dev" id="chamber_sensor_dev">
+                    <option value="0">Dev0DeviceID</option>
+                    <option value="1">Dev1DeviceID</option>
+                </select>
+                <button id="test_chamber_sensor_btn" type="button">Test</button>
+                <span id="test_chamber_temp_result"></span>
+            </fieldset>
+            <p>
+            <fieldset>
+                <legend>Actuators</legend>
+                Cooler Start/Stop Interval (sec)<br/>
+                <input type="number" name="cooler_interval" min="0" max="3600" step="60">
+                <button id="test_cooler_btn" type="button">Test</button>
+                <p>
+                Heater Start/Stop Interval (sec)<br/>
+                <input type="number" name="heater_interval" min="0" max="3600" step="60">
+                <button id="test_heater_btn" type="button">Test</button>
+            </fieldset>
+            <p>
+            <fieldset>
+                <legend>Networks</legend>
+                Machine SSID<br/>
+                <input type="text" name="ap_ssid" placeholder="eg. Fermenter">
+                <p>
+                WiFi Connection<br/>
+                <select name="wifi_ssid">
+                    <option value="28#301">28#301</option>
+                    <option value="28#301_ASUS">28#301_ASUS</option>
+                    <option value="CHINANET_123">CHINANET_123</option>
+                </select>
+                <br>
+                <input type="password" name="wifi_pass">
+                <button id="test__wort_sensor" type="button">Test</button>
+                <span id="test_wifi_result">SHOW TEST RESULT</span>
+            </fieldset>
+            <p>
+            <p>
+            <p>
+            <button id="save__btn" type="submit" formmethod="post" formaction="/settings">SAVE</button>
+        </form>
+
+        <script src="./static/zepto.min.js"></script>
+        <script>
+
+            function btn_test_click(sensor_id, btn_id, result_id, url){
+                document.getElementById(btn_id).addEventListener('click', function(){
+                    var sensor = document.getElementById(sensor_id).value;
+                    console.log(sensor);
+                    fetch(url + '/' + sensor).then(response => {
+                        document.getElementById(result_id).innerText = response;
+                    })
+                    console.log('sensor #' + sensor +' tested');
+                })
+            }
+
+            btn_test_click('wort_sensor_dev', 'test_wort_sensor_btn', 'test_wort_temp_result', '/test/sensor')
+            btn_test_click('chamber_sensor_dev', 'test_chamber_sensor_btn', 'test_chamber_temp_result', '/test/sensor')
+            
+        </script>
+    </body>
+</html>

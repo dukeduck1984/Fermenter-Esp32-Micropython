@@ -1,0 +1,110 @@
+.container{
+    background-color: orangered;
+    padding: 4px;
+    margin: 0px auto;
+}
+.status_container{
+    width: 100%;
+    height: 120px;
+    background-color: lightgrey;
+    display: -webkit-flex;
+    display: flex;
+    justify-content: center;
+    font-family: Tahoma, serif;
+}
+.status_bar{
+    margin: 4px;
+    background-color: white;
+    width: 120px;
+    padding: 5px;
+    text-align: center;
+}
+.plan_container{
+    width: 100%;
+    height: 350px;
+    background-color: white;
+    text-align: center;
+    font-family: Tahoma, serif;
+}
+.ferment_plan{
+    width: 100%;
+    padding: 5px;
+    background-color: white;
+    text-align: center;
+    font-family: Tahoma, serif;
+}
+.btn_add{
+    background-color: orangered;
+    border: none;
+    color: white;
+    padding: 1px 1px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 18px;
+    border-radius: 12px;
+    width: 26px;
+}
+.btn_add:active{
+    transform: translateY(4px);
+}
+.btn_delete{
+    background-color: orangered;
+    border: none;
+    color: white;
+    padding: 1px 1px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 18px;
+    border-radius: 12px;
+    width: 26px;
+}
+.btn_delete:active{
+    transform: translateY(4px);
+}
+.plan_input{
+    width: 60px;
+}
+.load_plan{
+    width: 100%;
+    padding: 10px;
+    background-color: white;
+}
+.start_container{
+    width: 100%;
+    padding: 12px;
+    background-color: white;
+    text-align: center;
+}
+.btn_load{
+    background-color: orangered;
+    border: none;
+    color: white;
+    padding: 10px 22px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 8px;
+    width: 90px;
+}
+.btn_load:active{
+    transform: translateY(4px);
+}
+.btn_start{
+    background-color: orangered;
+    border: none;
+    color: white;
+    padding: 10px 22px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 8px;
+    width: 260px;
+    height: 80px;
+}
+.btn_start:active{
+    transform: translateY(4px);
+}
