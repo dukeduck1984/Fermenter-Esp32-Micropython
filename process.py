@@ -8,13 +8,14 @@ class Process:
     """
     def __init__(self, fermenter_temp_ctrl_obj, control_timer_obj):
         """
-        fermenter_temp_ctrl_obj: instance of FermenterTempControl
-        control_timer_obj: instance of control timer
+        Initialize the fermenter process
+        :param fermenter_temp_ctrl_obj: Class; the instance of FermenterTempControl class
+        :param control_timer_obj: Class; the instance of the Timer class
         """
         self.fermentation_stages = None
         self.fermenter_temp_ctrl = fermenter_temp_ctrl_obj
         self.tim = control_timer_obj
-        self.total_stages = len(self.fermentation_stages)
+        self.total_stages = len(self.fermentation_stages) if self.fermentation_stages is not None else 0
         self.start_time = None
         self.elapsed_time = None
 

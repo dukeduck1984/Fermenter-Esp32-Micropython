@@ -72,8 +72,14 @@ class HttpServer:
 
             # TODO
             # 1. open config.json and read settings
+            with open('config.json', 'r') as f:
+             json = f.read()
+             settings = ujson.loads(json)
             # 2. fill the settings form with default settings
-            pass
+            httpResponse.WriteResponseJSONOk(
+                obj=settings,
+                headers=None
+            )
         
 
         @MicroWebSrv.route('/settings', 'POST')

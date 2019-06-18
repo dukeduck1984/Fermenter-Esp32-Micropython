@@ -68,6 +68,7 @@ heater = Actuator(pin=settings['heater_pin'], interval=settings['heater_interval
 
 # initialize the LED
 led = RgbLed(r_pin=settings['rgb_pins']['r_pin'], g_pin=settings['rgb_pins']['g_pin'], b_pin=settings['rgb_pins']['b_pin'])
+led.set_color('green')  # LED初始化后设置为绿色，表示处于待机状态
 
 # initialize the OLED sceen
 oled = OLED(scl_pin=settings['oled_i2c_pins']['scl'], sda_pin=settings['oled_i2c_pins']['sda'])

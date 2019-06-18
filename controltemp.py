@@ -52,9 +52,12 @@ class FermenterTempControl:
 
         # Set LED color according to actuator status
         if self.heater.is_on() and not self.cooler.is_on():
+            # LED为红色表示发酵箱正在制热
             self.led.set_color('red')
         elif self.cooler.is_on() and not self.heater.is_on():
+            # LED为蓝色表示发酵箱正在制冷
             self.led.set_color('blue')
         else:
+            # LED为绿色表示发酵箱处于待机状态（制热制冷均不工作）
             self.led.set_color('green')
 
