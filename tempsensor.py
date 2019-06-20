@@ -61,4 +61,3 @@ class Ds18Sensor:
         :return: float;
         """
         return round(self._ds.read_temp(), 1)
-

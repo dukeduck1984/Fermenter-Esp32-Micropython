@@ -56,4 +56,3 @@ class Actuator:
         return: boolean; the on/off status of the actuator
         """
         return self.status
-
