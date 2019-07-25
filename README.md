@@ -24,7 +24,7 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 
 ### API
 #### /overview
-* GET
+* GET  // 每1分钟从后台更新一次数据
 ```
 {
   breweryName: "豚鼠精酿",  // string, 酒厂名称
@@ -39,7 +39,30 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
   isCooling: true,  // boolean, 制冷压缩机是否开启
   originalGravity: 1.345,  // number, 初始比重
   currentGravity: 1.023,  // number, 当前比重
-  beerName: "Two-Hearted IPA",  // string, 所酿啤酒的名称
+  // beerName: "Two-Hearted IPA",  // string, 所酿啤酒的名称
+  //fermentationSteps: [  // array, 发酵步骤
+  //  {
+  //    days: 2,  // number, 天数
+  //    temp: 18.2  // number, 温度
+  //  },
+  //  {
+  //    days: 14,
+  //    temp: 20.5
+  //  },
+  //  {
+  //    days: 7,
+  //    temp: 22
+  //  }
+  //],
+  currentFermentationStepIndex: 0,  // number, 当前发酵步骤的index，从0开始计
+  currentFermentationStepPercentage: 74  // number, 当前发酵步骤的完成百分比
+}
+```
+
+#### /fermentation
+* POST  // 向后端发送发酵步骤
+```
+{
   fermentationSteps: [  // array, 发酵步骤
     {
       days: 2,  // number, 天数
@@ -54,7 +77,43 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
       temp: 22
     }
   ],
-  currentFermentationStepIndex: 0,  // number, 当前发酵步骤的index，从0开始计
-  currentFermentationStepPercentage: 74  // number, 当前发酵步骤的完成百分比
+}
+```
+
+#### /settings
+* GET  // 从后端获取设置信息
+```
+{
+  breweryName: "豚鼠精酿",  // string, 酒厂名称
+  ssid: "Fermenter",  // string, ESP32自己的WIFI信号SSID
+  wifiList: [  // array, ESP32搜索到的WIFI热点列表
+  "SSID0",  // string
+  "SSID1",
+  ...,
+  "SSID9"
+  ],
+  tempSensorList: [  // array, 温度传感器列表
+    {  // object
+      devNum: 0,  // number，传感器序号
+      romCode: "DS18B20XX02"  // string, 传感器编码
+    },
+    {
+      devNum: 1,
+      romCode: "DS18B20XD51"
+    }
+  ]
+}
+```
+* POST  // 向后端发送设置信息
+```
+{
+  breweryName: "豚鼠精酿",  // string, 酒厂名称
+  apSsid: "Fermenter",  // string, ESP32自己的WIFI信号SSID
+  wifi: {  // object, 要连接的wifi热点ssid和连接密码
+    ssid: "SSID1",
+    pass: "thisissecret"
+  },
+  wortSensorDev: 0,  // number, 麦芽汁温度传感器序号
+  chamberSensorDev: 1,  // number, 冰箱环境温度传感器序号
 }
 ```
