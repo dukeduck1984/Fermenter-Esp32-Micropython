@@ -21,3 +21,7 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 2. 选择并连接WIFI热点
 3. 设置温度传感器编号
 4. 设置酒厂名称
+
+### API
+- /overview
+-- GET
