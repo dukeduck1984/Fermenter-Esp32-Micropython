@@ -89,8 +89,8 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
   chamberSensorDev: 1,  // number，传感器序号
   apSsid: "Fermenter",  // string, ESP32自己的WIFI信号SSID
   wifi: {  // object, 要连接的wifi热点ssid和连接密码
-    ssid: "28#301",
-    pass: "1318028301"
+    ssid: "SSID1",
+    pass: "thisissecret"
   }
   wifiList: [  // array, ESP32搜索到的WIFI热点列表
   "SSID0",  // string
