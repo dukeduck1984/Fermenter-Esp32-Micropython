@@ -85,27 +85,33 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 ```
 {
   breweryName: "豚鼠精酿",  // string, 酒厂名称
-  wortSensorDev: 0,  // number，传感器序号
-  chamberSensorDev: 1,  // number，传感器序号
   apSsid: "Fermenter",  // string, ESP32自己的WIFI信号SSID
   wifi: {  // object, 要连接的wifi热点ssid和连接密码
     ssid: "SSID1",
     pass: "thisissecret"
   }
   wifiList: [  // array, ESP32搜索到的WIFI热点列表
-  "SSID0",  // string
-  "SSID1",
-  ...,
-  "SSID9"
+    "SSID0",  // string
+    "SSID1",
+    ...,
+    "SSID9"
   ],
+  wortSensorDev: {  // object
+    value: 0,  // number，传感器序号
+    label: "DS18B20XX02"  // string, 传感器编码
+  },
+  chamberSensorDev: {
+    value: 1,  // number，传感器序号
+    label: "DS18B20XD51"  // string, 传感器编码
+  },
   tempSensorList: [  // array, 温度传感器列表
     {  // object
-      devNum: 0,  // number，传感器序号
-      romCode: "DS18B20XX02"  // string, 传感器编码
+      value: 0,  // number，传感器序号
+      label: "DS18B20XX02"  // string, 传感器编码
     },
     {
-      devNum: 1,
-      romCode: "DS18B20XD51"
+      value: 1,
+      label: "DS18B20XD51"
     }
   ]
 }
@@ -119,7 +125,13 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
     ssid: "SSID1",
     pass: "thisissecret"
   },
-  wortSensorDev: 0,  // number, 麦芽汁温度传感器序号
-  chamberSensorDev: 1,  // number, 冰箱环境温度传感器序号
+  wortSensorDev: {  // object
+    value: 0,  // number，传感器序号
+    label: "DS18B20XX02"  // string, 传感器编码
+  },
+  chamberSensorDev: {
+    value: 1,  // number，传感器序号
+    label: "DS18B20XD51"  // string, 传感器编码
+  },
 }
 ```
