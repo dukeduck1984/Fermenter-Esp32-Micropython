@@ -17,10 +17,10 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 - [ ] 记录糖度比重数据，显示比重折线图
 
 ### 设置页
-- [ ] 设置ESP32自己的SSID
-- [ ] 选择并连接WIFI热点
-- [ ] 设置温度传感器编号
-- [ ] 设置酒厂名称
+- [X] 设置ESP32自己的SSID
+- [X] 选择并连接WIFI热点
+- [X] 设置温度传感器编号
+- [X] 设置酒厂名称
 
 ### API
 #### /overview
