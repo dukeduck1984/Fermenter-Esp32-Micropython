@@ -12,7 +12,7 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 - [X] 显示糖度比重数据（mdi-test-tube）
 - [X] 待机时：可编辑所酿酒的名称（mdi-beer）、发酵步骤，包括发酵时长（天）（mdi-calendar-clock）、发酵目标温度（mdi-temperature-celsius）。至少需要一个发酵步骤才能启动发酵工作状态。
 - [X] 发酵中：显示全部发酵步骤，标识出已完成（mdi-check-circle）、进行中（大于零小于十五mdi-circle-slice-1，十五到三十mdi-circle-slice-2，三十到四十五mdi-circle-slice-3，四十五到五十五mdi-circle-slice-4，五十五到七十mdi-circle-slice-5，七十到八十五mdi-circle-slice-6，大于八十五小于一百mdi-circle-slice-7）、未完成（mdi-circle-outline）的步骤；结合进度条显示当前步骤完成进度百分比，显示当前步骤剩余天数和小时数。
-- [ ] 发酵完成：弹出提示框表示已经完成。
+- [X] 发酵完成：弹出提示框表示已经完成。
 - [ ] 记录温度和时间数据到tf卡，显示温度折线图
 - [ ] 记录糖度比重数据，显示比重折线图
 
