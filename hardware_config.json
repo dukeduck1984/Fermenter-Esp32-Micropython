@@ -1,0 +1,12 @@
+{
+  "onewire_pin": 25,
+  "cooler_pin": 18,
+  "heater_pin": 23,
+  "rgb_pins": {
+    "r_pin": 2,
+    "g_pin": 0,
+    "b_pin": 4
+  },
+  "cooler_interval": 300,
+  "heater_interval": 0
+}

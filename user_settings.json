@@ -1,0 +1,10 @@
+{
+  "breweryName": "豚鼠精酿",
+  "wortSensorDev": 0,
+  "chamberSensorDev": 1,
+  "apSsid": "Fermenter",
+  "wifi": {
+    "ssid": "28#301",
+    "pass": "1318028301"
+  }
+}

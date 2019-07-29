@@ -12,31 +12,32 @@ class Process:
         :param fermenter_temp_ctrl_obj: Class; the instance of FermenterTempControl class
         :param control_timer_obj: Class; the instance of the Timer class
         """
-        self.fermentation_stages = None
+        self.fermentation_steps = None
         self.fermenter_temp_ctrl = fermenter_temp_ctrl_obj
         self.tim = control_timer_obj
-        self.total_stages = len(self.fermentation_stages) if self.fermentation_stages is not None else 0
+        self.total_steps = len(self.fermentation_steps) if self.fermentation_steps is not None else 0
         self.start_time = None
         self.elapsed_time = None
+        self.is_completed = False
+        self.current_step_index = None
+        self.step_hours = None
+        self.step_target_temp = None
 
-
-    def load_stages(self, fermentation_stages):
+    def load_steps(self, fermentation_steps):
         """
-        fermentation_stages: nested list; eg.[[stage0_hours, target temp], [stage1_hours, target temp], ...]
+        fermentation_stages: nested list; eg.[{'days': 2, 'temp': 18.6}, {'days': 14, 'temp': 21.5}, ..., {'days': 5, 'temp': 23.0}]
         """
-        self.fermentation_stages = fermentation_stages
-
+        self.fermentation_steps = fermentation_steps
 
     def _fermenter_ctrl(self, t):
         """
         start fermenter temp control.
         This is a callback function run by a periodic timer
         """
-        self.fermenter_temp_ctrl.run(self.stage_target_temp)
-        self._stage_progress_check()
+        self.fermenter_temp_ctrl.run(self.step_target_temp)
+        self._step_progress_check()
 
-
-    def _stage_progress_check(self):
+    def _step_progress_check(self):
         """
         check the stage progress
         """
@@ -44,32 +45,33 @@ class Process:
         self.elapsed_time = now - self.start_time
         
         # if stage time is up
-        if self.elapsed_time >= (self.stage_hours * 3600):
+        if self.elapsed_time >= (self.step_hours * 3600):
             # if this is not the final stage
-            if self.current_stage_index < (self.total_stages - 1):
+            if self.current_step_index < (self.total_steps - 1):
                 # then proceed to next stage
-                new_stage_index = self.current_stage_index + 1
-                self.start(new_stage_index)
+                new_step_index = self.current_step_index + 1
+                self.start(new_step_index)
             # if this is the end of the final stage
             else:
-                # maybe do something later...
-                # TODO
-                # send a message or email
-                pass
+                self.start_time = None
+                self.is_completed = True
+                self.fermenter_temp_ctrl.job_done = True
+                self.fermenter_temp_ctrl.led.set_color('orange')
+                print('All fermentation stages have completed.')
+                # the periodic timer is still running to maintain the temperature control
 
-
-    def start(self, stage_index=0):
+    def start(self, step_index=0):
         """
         pass stage index to get stage settings and start the timer
         the timer calls temperature control & stage check function
 
         stage_index: int;
         """
-        if self.fermentation_stages:
-            self.current_stage_index = stage_index
-            stage_settings = self.fermentation_stages[stage_index]
-            self.stage_hours = float(stage_settings[0])
-            self.stage_target_temp = float(stage_settings[1])
+        if self.fermentation_steps:
+            self.current_step_index = step_index
+            step_settings = self.fermentation_steps[step_index]
+            self.step_hours = float(step_settings['days'] * 24)
+            self.step_target_temp = float(step_settings['temp'])
 
             self.start_time = utime.time()
 
@@ -77,10 +79,9 @@ class Process:
             utime.sleep_ms(100)
             self.tim.init(period=5000, mode=machine.Timer.PERIODIC, callback=self._fermenter_ctrl)
         else:
-            print('Load fermentation stages first!')
+            print('Load fermentation steps first!')
 
-
-    def is_started(self):
+    def has_started(self):
         """Check whether fermentation process is started or not
         
         Returns:
@@ -91,39 +92,77 @@ class Process:
         else:
             return False
 
-
-    def is_loaded(self):
+    def has_loaded(self):
         """Check whether fermentation stages is loaded or not
         
         Returns:
             [bool] -- [whether fermentation stages is loaded or not]
         """
 
-        if self.fermentation_stages:
+        if self.fermentation_steps:
             return True
         else:
             return False
 
-    def get_stage_info(self):
+    def has_completed(self):
+        """Check whether fermentation has finished or not
+
+        Returns:
+            [bool] -- [whether fermentation has finished or not]
         """
-        get fermentation stage info, for API or OLED
-            target temperature: str; (eg. 19.6C')
-            stage status: str; (eg. 1/3)
-            complete percentage: str; (eg. 85%)
-        return: tuple;(str, str, str)
+        return self.is_completed
+
+    def get_process_info(self):
         """
+        get fermentation stage info, for API
+        """
+        is_heating = self.fermenter_temp_ctrl.heater.is_on()
+        is_cooling = self.fermenter_temp_ctrl.cooler.is_on()
+        wort_temp = self.fermenter_temp_ctrl.wort_sensor.read_temp()
+        chamber_temp = self.fermenter_temp_ctrl.chamber_sensor.read_temp()
         # if fermentation in progress
-        if self.start_time:
-            target_temp = str(round(self.stage_target_temp, 1))
-            stage_status = str(self.current_stage_index + 1) + '/' + str(self.total_stages)
-            stage_percentage = int((self.elapsed_time / (self.stage_hours * 3600)) * 100)
-            if stage_percentage > 100:
-                stage_percentage = 100
-            stage_percentage = str(stage_percentage) + '%'
+        if self.has_started():
+            machine_status = 'done' if self.is_completed else 'running'
+            target_temp = round(self.step_target_temp, 1)
+            total_steps = self.total_steps
+            current_step = self.current_step_index + 1
+            step_percentage = int((self.elapsed_time / (self.step_hours * 3600)) * 100)
+            total_percentage = int((sum([step['days'] for step in self.fermentation_steps[:self.current_step_index]]) * 24 * 3600 + self.elapsed_time) / (sum([step['days'] for step in self.fermentation_steps]) * 24 * 3600) * 100)
+            step_hours_left = (self.step_hours * 3600 - self.elapsed_time) // 3600
+            total_hours_left = (sum([step['days'] for step in self.fermentation_steps[self.current_step_index:]]) * 24 * 3600 - self.elapsed_time) // 3600
+            if step_percentage > 100:
+                step_percentage = 100
+            if total_percentage > 100:
+                total_percentage = 100
+            return {
+                'machineStatus': machine_status,  # str
+                'setTemp': target_temp, # float
+                'wortTemp': wort_temp, # float
+                'chamberTemp': chamber_temp, # float
+                'isHeating': is_heating,  # bool
+                'isCooling': is_cooling,  # bool
+                'currentFermentationStepIndex': self.current_step_index,  # int
+                'currentFermentationStep': current_step,  # int
+                'totalFermentationStep': total_steps,  # int
+                'stepHoursLeft': step_hours_left,  # float
+                'totalHoursLeft': total_hours_left,  # float
+                'currentFermentationStepPercentage': step_percentage,  # int
+                'totalFermentationStepPercentage': total_percentage  # int
+            }
         else:
-            target_temp = "--.-"
-            stage_status = 'N/A'
-            stage_percentage = '---%'
-
-        return target_temp, stage_status, stage_percentage
-
+            machine_status = 'standby'
+            return {
+                'machineStatus': machine_status,  # str
+                'setTemp': None,
+                'wortTemp': wort_temp,
+                'chamberTemp': chamber_temp,
+                'isHeating': is_heating,  # bool
+                'isCooling': is_cooling,  # bool
+                'currentFermentationStepIndex': None,
+                'currentFermentationStep': None,
+                'totalFermentationStep': None,
+                'stepHoursLeft': None,
+                'totalHoursLeft': None,
+                'currentFermentationStepPercentage': None,
+                'totalFermentationStepPercentage': None
+            }

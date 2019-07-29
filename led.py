@@ -4,7 +4,6 @@
 # See: https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo
 #
 import machine
-import utime
 
 
 class RgbLed:
@@ -74,4 +73,3 @@ class RgbLed:
         :return: None
         """
         self.set_color('off')  # turn of the led light
-
