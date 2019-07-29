@@ -58,7 +58,7 @@ class WiFi:
         return: string; the IP of the STA
         """
         self.sta.connect(ap_ssid, ap_pass)
-        utime.sleep_ms(500)
+        utime.sleep(5)
         return self.get_sta_ip_addr()
 
     def is_connected(self):

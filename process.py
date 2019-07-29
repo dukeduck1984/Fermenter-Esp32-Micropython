@@ -147,7 +147,7 @@ class Process:
                 'stepHoursLeft': step_hours_left,  # float
                 'totalHoursLeft': total_hours_left,  # float
                 'currentFermentationStepPercentage': step_percentage,  # int
-                'totalFermentationStepPercentage': total_percentage  # int
+                'totalFermentationStepPercentage': total_percentage,  # int
             }
         else:
             machine_status = 'standby'
@@ -164,5 +164,5 @@ class Process:
                 'stepHoursLeft': None,
                 'totalHoursLeft': None,
                 'currentFermentationStepPercentage': None,
-                'totalFermentationStepPercentage': None
+                'totalFermentationStepPercentage': None,
             }
