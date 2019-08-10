@@ -59,6 +59,8 @@ class WiFi:
         return: string; the IP of the STA
         """
         # TODO: 一旦密码输错，会无线循环尝试重新连接，需要修正
+        if self.is_connected():
+            self.sta.disconnect()
         try:
             self.sta.connect(ap_ssid, ap_pass)
         except:
