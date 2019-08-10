@@ -1,7 +1,4 @@
-#
-# Web server powered by MicroWebSrv (a frozen module in Loboris firmware for ESP32)
-#
-from microWebServer import MicroWebSrv
+from microWebSrv import MicroWebSrv
 import machine
 import ujson
 
@@ -12,6 +9,7 @@ class HttpServer:
         self.wifi = wifi_obj
         self.rtc = rtc_obj
         self.settings = user_settings_dict
+        self.app = None
 
     def start(self):
         process = self.process
@@ -61,10 +59,22 @@ class HttpServer:
             """
             json = httpClient.ReadRequestContentAsJSON()
             # fermentationSteps = ujson.loads(json)['fermentationSteps']
+            beerName = json['beerName']
             fermentationSteps = json['fermentationSteps']
             try:
+                process.set_beer_name(beerName)
                 process.load_steps(fermentationSteps)
                 process.start()
+            except:
+                # throw 501 error code
+                httpResponse.WriteResponseNotImplemented()
+            else:
+                httpResponse.WriteResponseOk()
+
+        @MicroWebSrv.route('/abort')
+        def abort_get(httpClient, httpResponse):
+            try:
+                process.abort()
             except:
                 # throw 501 error code
                 httpResponse.WriteResponseNotImplemented()
@@ -77,7 +87,7 @@ class HttpServer:
             从后台读取设置参数
             """
             wifi_list = wifi.scan_wifi_list()
-            temp_sensor_list = process.fermenter_temp_ctrl.chamber_sensor.ow.get_device_list()
+            temp_sensor_list = process.fermenter_temp_ctrl.chamber_sensor.ds_obj.get_device_list()
             # open user_settings.json and read settings
             with open('user_settings.json', 'r') as f:
                 settings_dict = ujson.load(f)
@@ -137,10 +147,13 @@ class HttpServer:
 
         @MicroWebSrv.route('/reboot')
         def reboot_get(httpClient, httpResponse):
-            httpResponse.WriteResponseOk()
-            utime.sleep(1)
-            # restart after saving
-            machine.reset()
+            tim = machine.Timer(-1)
+            try:
+                tim.init(period=3000, mode=machine.Timer.ONE_SHOT, callback=lambda t: machine.reset())
+            except:
+                httpResponse.WriteResponseNotImplemented()
+            else:
+                httpResponse.WriteResponseOk()
 
         @MicroWebSrv.route('/wifi')
         def wifi_get(httpClient, httpResponse):
@@ -186,30 +199,40 @@ class HttpServer:
             # dev_num_json = httpClient.ReadRequestContentAsJSON()
             # sensor_dict = ujson.loads(dev_num_json)
             sensor_dict = httpClient.ReadRequestContentAsJSON()
-            new_wort_dev_num = sensor_dict['wortSensorDev']['value']
-            new_chamber_dev_num = sensor_dict['chamberSensorDev']['value']
+            new_wort_dev_num = sensor_dict.get('wortSensorDev').get('value')
+            new_chamber_dev_num = sensor_dict.get('chamberSensorDev').get('value')
             # 获取温感对象实例
             wort_sensor = process.fermenter_temp_ctrl.wort_sensor
             chamber_sensor = process.fermenter_temp_ctrl.chamber_sensor
             # 更新温感设备序号
             wort_sensor.update_device_num(new_wort_dev_num)
             chamber_sensor.update_device_num(new_chamber_dev_num)
-            # 测量温度
-            wort_temp = wort_sensor.get_realtime_temp()
-            chamber_temp = chamber_sensor.get_realtime_temp()
-            temp_dict = {
-                'wortTemp': wort_temp,
-                'chamberTemp': chamber_temp
-            }
-            # temp_json = ujson.dumps(temp_dict)
-            httpResponse.WriteResponseJSONOk(obj=temp_dict, headers=None)
+            try:
+                # 测量温度
+                wort_temp = wort_sensor.read_temp()
+                chamber_temp = chamber_sensor.read_temp()
+            except:
+                # throw 501 error code
+                httpResponse.WriteResponseNotImplemented()
+            else:
+                temp_dict = {
+                    'wortTemp': wort_temp,
+                    'chamberTemp': chamber_temp
+                }
+                # temp_json = ujson.dumps(temp_dict)
+                httpResponse.WriteResponseJSONOk(obj=temp_dict, headers=None)
 
         @MicroWebSrv.route('/gravity', 'POST')
         def gravity_get(httpClient, httpResponse):
             # TODO 此接口用于数字比重计向发酵罐传递比重数据和电量信息，收到数据后触发回调函数
             pass
 
-
         # Initialize the Web server
-        app = MicroWebSrv(webPath='/flash')
-        app.Start(threaded=True)  # Starts the server
+        self.app = MicroWebSrv(webPath='/www')
+        self.app.Start(threaded=True)  # Starts the server
+
+    def is_started(self):
+        if self.app:
+            return self.app.IsStarted()
+        else:
+            return False

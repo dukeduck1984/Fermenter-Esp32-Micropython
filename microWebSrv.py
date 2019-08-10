@@ -60,7 +60,9 @@ class MicroWebSrv:
         ".png": "image/png",
         ".gif": "image/gif",
         ".svg": "image/svg+xml",
-        ".ico": "image/x-icon"
+        ".ico": "image/x-icon",
+        ".woff": "application/font-woff",
+        ".woff2": "application/font-woff2"
     }
 
     _html_escape_chars = {

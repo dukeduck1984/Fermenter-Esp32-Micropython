@@ -1,112 +1,95 @@
 import machine
+import onewire
+import ds18x20
 
 
-class OneWireDevice:
+# class RomCodeConvert:
+#     @staticmethod
+#     def _to_romcode_string(bytearray_romcode):
+#         """
+#         把bytearray格式的rom code转换为字符串格式
+#         如：bytearray_romcode = bytearray(b'(\xaa4\xe4\x18\x13\x02;')
+#         转换后为：'28 aa 34 e4 18 13 02 3b'
+#         :param bytearray_romcode: bytearray
+#         :return: str
+#         """
+#         import ubinascii
+#         string_hex_list = [str(ubinascii.hexlify(bytes([el])), 'utf8') for el in bytearray_romcode]
+#         romcode_str = ' '.join(string_hex_list)
+#         return romcode_str
+#
+#     @staticmethod
+#     def _to_romcode_bytearray(string_romcode):
+#         """
+#         把字符串格式的rom code转换为bytearray格式
+#         如：string_romcode = '28 aa 34 e4 18 13 02 3b'
+#         转换后为：bytearray(b'(\xaa4\xe4\x18\x13\x02;')
+#         :param string_romcode: str
+#         :return: bytearray
+#         """
+#         import ubinascii
+#         string_hex_list = string_romcode.split()
+#         bytes_list = [int.from_bytes(bytes(ubinascii.unhexlify(el)), 'big') for el in string_hex_list]
+#         romcode_bytearray = bytearray(bytes_list)
+#         return romcode_bytearray
+
+
+class Ds18Sensors:
     def __init__(self, pin):
-        """
-        Initialize the OW module
-        :param pin: int; the pin number for OW devices
-        """
-        self.onewire_bus = machine.Onewire(pin)
-        self._device_list = None
-        self._device_qty = None
-
-    def get_onewire_bus(self):
-        return self.onewire_bus
-    
-    def get_device_qty(self):
-        """
-        Return the qty of OW devices connecting to the OW pin
-        return: int; the qty of the detected devices
-        """
-        self._device_qty = len(self.onewire_bus.scan())
-        return self._device_qty
-
-    def get_device_list(self):
-        """
-        Return the list of the OW devices connected
-        return: list; the detected device list
-                eg.[
-                {'value': 0, 'label': '6e000000c86a8e28'},
-                {'value': 1, 'label': '02000000c82a8928'}
-                ]
-        """
-        self._device_list = self.onewire_bus.scan()
-        return [
-            {'value': device_number, 'label': rom_code}
-            for device_number, rom_code in enumerate(self._device_list)
-        ]
-
-class Ds18Sensor:
-    def __init__(self, onewire_object, device_num):
         """
         Initialize the DS18 temperature sensor
         :param onewire_object: Class; the OneWireDevice instance
-        :param device_num: int; Device Num of the DS18
         """
-        self.ow = onewire_object
-        self.is_ready = False
+        self.ow = onewire.OneWire(machine.Pin(pin))
+        self.ds = ds18x20.DS18X20(self.ow)
+        self.device_list = None
         self.last_reading_available = False
-        try:
-            self._ds = machine.Onewire.ds18x20(self.ow.get_onewire_bus(), device_num)
-        except:
-            print('Invalid Device Number.')
-        else:
-            self._device_num = device_num
-            self.is_ready = True
 
-    def get_rom_code(self):
-        """
-        :return: str; the Rom Code in Hex string of the DS18 device
-        """
-        if self.is_ready:
-            return self._ds.rom_code()
-        else:
-            return 'Sensor Error.'
+    def get_device_list(self):
+        self.device_list = self.ds.scan()
+        return [
+            {'value': device_number, 'label': hex(int.from_bytes(bytearray_romcode, ''))}
+            for device_number, bytearray_romcode in enumerate(self.device_list)
+        ]
+
+    def get_device_qty(self):
+        if not self.device_list:
+            self.device_list = self.ds.scan()
+        return len(self.device_list)
     
     def get_realtime_temp(self):
         """
         Perform a measurement of the temperature and return the temperature
         :return: float; realtime temperature in Celsius measured by the DS18 sensor
         """
-
-        if self.is_ready:
-            temp = round(self._ds.convert_read(), 1)
-            if isinstance(temp, float):
-                self.last_reading_available = True
-                return temp
-            else:
-                # in case of reading failure
-                # deinit and re-init the ds18
-                self._ds.deinit()
-                self._ds = machine.Onewire.ds18x20(self.ow.get_onewire_bus(), self._device_num)
-                self.last_reading_available = True
-                return round(self._ds.convert_read(), 1)
+        try:
+            self.ds.convert_temp()
+        except:
+            self.last_reading_available = False
         else:
-            return -99.9
+            self.last_reading_available = True
+
+
+class SingleTempSensor:
+    def __init__(self, ds_obj, device_number):
+        self.ds_obj = ds_obj
+        if device_number + 1 <= self.ds_obj.get_device_qty():
+            self.bytearray_romcode = self.ds_obj.device_list[device_number]
+        else:
+            self.bytearray_romcode = None
+            print('Invalid Device Number!')
 
     def read_temp(self):
-        """
-        Return the last measurement value of the temperature.  It's NOT a realtime measurement.
-        :return: float;
-        """
-        if self.last_reading_available:
-            return round(self._ds.read_temp(), 1)
-        else:
-            return self.get_realtime_temp()
+        if not self.ds_obj.last_reading_available:
+            self.ds_obj.get_realtime_temp()
+        if self.bytearray_romcode:
+            return round(self.ds_obj.ds.read_temp(self.bytearray_romcode), 1)
 
-    def update_device_num(self, new_device_num):
-        """
-        Update sensor device number
-        :param new_device_num: int; device number
-        :return: None
-        """
-        self._ds.deinit()
-        try:
-            self._ds = machine.Onewire.ds18x20(self.ow.get_onewire_bus(), new_device_num)
-        except:
-            print('Invalid Device Number.')
+    def update_device_num(self, new_device_number):
+        if new_device_number + 1 <= self.ds_obj.get_device_qty():
+            self.bytearray_romcode = self.ds_obj.device_list[new_device_number]
         else:
-            self._device_num = new_device_num
-            self.last_reading_available = False
-            self.is_ready = True
+            self.bytearray_romcode = None
+            print('Invalid Device Number!')
+
+        self.ds_obj.last_reading_available = False

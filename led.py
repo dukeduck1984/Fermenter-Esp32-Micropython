@@ -1,8 +1,3 @@
-#
-# This code works for ESP32 psRAM LoBo port of the micropython
-# The code is not compatible with ESP8266 or the official port of the ESP32
-# See: https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo
-#
 import machine
 
 
@@ -37,16 +32,16 @@ class RgbLed:
     @staticmethod
     def _rgb_decimal_duty(r, g, b):
         """
-        convert rgb decimal to pwm duty cycle %
+        convert rgb decimal to pwm duty cycle 1023
         :param r: int; red decimal
         :param g: int; green decimal
         :param b: int; blue decimal
         :return: tuple; red duty%, green duty%, blue duty%
         """
-        n = 100 / 255
-        r_duty = r * n
-        g_duty = g * n
-        b_duty = b * n
+        n = 1023 / 255
+        r_duty = int(r * n)
+        g_duty = int(g * n)
+        b_duty = int(b * n)
         return r_duty, g_duty, b_duty
 
     def set_color(self, color_name):
@@ -64,7 +59,7 @@ class RgbLed:
         else:
             # set led to green
             self.led_red.duty(0)
-            self.led_green.duty(100)
+            self.led_green.duty(1023)
             self.led_blue.duty(0)
 
     def turn_off(self):

@@ -18,6 +18,7 @@ class WiFi:
         """
         # Initialize the network
         self.ap.active(True)  # activate the AP interface
+        utime.sleep_ms(200)
         self.ap.config(essid=ssid)
         #self.ap.config(essid=ssid + self.machine_id)  # set ssid
         utime.sleep_ms(200)
@@ -57,9 +58,14 @@ class WiFi:
         Connect to an Access Point by its SSID and Password
         return: string; the IP of the STA
         """
-        self.sta.connect(ap_ssid, ap_pass)
-        utime.sleep(5)
-        return self.get_sta_ip_addr()
+        # TODO: 一旦密码输错，会无线循环尝试重新连接，需要修正
+        try:
+            self.sta.connect(ap_ssid, ap_pass)
+        except:
+            pass
+        else:
+            utime.sleep(2)
+            return self.get_sta_ip_addr()
 
     def is_connected(self):
         return self.sta.isconnected()

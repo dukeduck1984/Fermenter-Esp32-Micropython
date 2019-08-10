@@ -20,6 +20,7 @@ class Actuator:
         if val == 0 or val == 1:
             self.actuator.value(val)
             self.last_time = utime.time()
+            self.status = val == 1
         else:
             print('Invalid action!')
             return
@@ -42,14 +43,18 @@ class Actuator:
         turn on the actuator
         """
         self.check_interval(1)
-        self.status = True  # set status to 'on'
     
     def off(self):
         """
         turn off the actuator
         """
         self.check_interval(0)
-        self.status = False  # set status to 'off'
+
+    def force_off(self):
+        """
+        force turning off the actuator
+        """
+        self.action(0)
     
     def is_on(self):
         """

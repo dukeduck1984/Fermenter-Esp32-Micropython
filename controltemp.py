@@ -16,7 +16,7 @@ class FermenterTempControl:
         self.pid = pid_obj
         self.led = led_obj
         self.job_done = False
-        self.led.set_color('green')  # set led to green when machine is on while actuators are not working
+        # self.led.set_color('green')  # set led to green when machine is on while actuators are not working
     
     def get_wort_temp(self):
         return self.wort_sensor.read_temp()
@@ -63,3 +63,8 @@ class FermenterTempControl:
                 # LED为绿色表示发酵箱处于待机状态（制热制冷均不工作）
                 self.led.set_color('green')
 
+    def reset(self):
+        self.heater.force_off()
+        self.cooler.force_off()
+        self.led.set_color('green')
+        self.job_done = False

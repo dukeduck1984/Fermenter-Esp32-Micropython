@@ -7,12 +7,14 @@ import utime
 
 from actuator import Actuator
 from controltemp import FermenterTempControl
+from crash_recovery import CrashRecovery
 from fermenterpid import FermenterPID
 from httpserver import HttpServer
 from led import RgbLed
+from microDNSSrv import MicroDNSSrv
 from process import Process
 from rtc import RealTimeClock
-from tempsensor import OneWireDevice, Ds18Sensor
+from tempsensor import Ds18Sensors, SingleTempSensor
 from wifi import WiFi
 
 ##################################   MACHINE HARDWARE CONFIG   #################################
@@ -44,16 +46,18 @@ from wifi import WiFi
 #################################################################################################
 
 # get settings from JSON file
+print('--------------------')
+print('Loading settings and configurations...')
 
 with open('hardware_config.json', 'r') as f:
     json = f.read()
 config = ujson.loads(json)
-print('File hardware_config.json loaded!')
+print('File hardware_config.json has been loaded!')
 
 with open('user_settings.json', 'r') as f:
     json = f.read()
 settings = ujson.loads(json)
-print('File user_settings.json loaded!')
+print('File user_settings.json has been loaded!')
 print('--------------------')
 
 # change and save settings will overwrite the hardware_config.json file and reset the machine (machine.reset())
@@ -61,12 +65,12 @@ print('--------------------')
 
 
 # initialize onewire devices
-ow = OneWireDevice(pin=config['onewire_pin'])
+temp_sensors = Ds18Sensors(pin=config['onewire_pin'])
 utime.sleep(1)
 # initialize ds18 sensors
-wort_sensor = Ds18Sensor(ow, device_num=settings['wortSensorDev'])  # the temp sensor measures wort temperature
+wort_sensor = SingleTempSensor(temp_sensors, device_number=settings['wortSensorDev'])  # the temp sensor measures wort temperature
 utime.sleep(1)
-chamber_sensor = Ds18Sensor(ow, device_num=settings['chamberSensorDev'])  # the temp sensor measures chamber temperature
+chamber_sensor = SingleTempSensor(temp_sensors, device_number=settings['chamberSensorDev'])  # the temp sensor measures chamber temperature
 utime.sleep(1)
 print('DS18B20 sensors initialized')
 print('--------------------')
@@ -82,7 +86,7 @@ print('--------------------')
 
 # initialize the LED
 led = RgbLed(r_pin=config['rgb_pins']['r_pin'], g_pin=config['rgb_pins']['g_pin'], b_pin=config['rgb_pins']['b_pin'])
-led.set_color('pink')  # LED初始化后设置为粉色
+led.set_color('magenta')  # LED初始化后设置为粉色
 print('LED initialized')
 print('--------------------')
 
@@ -99,8 +103,13 @@ print('--------------------')
 # create a timer for fermentation process
 process_tim = machine.Timer(1)
 
+# initialize the crash recovery
+recovery = CrashRecovery()
+print('Crash recovery initialized')
+print('--------------------')
+
 # initialize the fermentation process
-main_process = Process(fermenter_temp_ctrl, process_tim)
+main_process = Process(fermenter_temp_ctrl, process_tim, recovery)
 print('Main process logic initialized')
 print('--------------------')
 
@@ -113,8 +122,7 @@ def measure_realtime_temps():
     while True:
         # get realtime temperature from sensors
         try:
-            wort_sensor.get_realtime_temp()
-            chamber_sensor.get_realtime_temp()
+            temp_sensors.get_realtime_temp()
         except:
             print('Error occurs when reading temperature')
 
@@ -125,7 +133,7 @@ def measure_realtime_temps():
 # run measure temp function in a new thread
 _thread.stack_size(7 * 1024)
 print('Stack allocated')
-temp_th = _thread.start_new_thread("temp", measure_realtime_temps, ())
+temp_th = _thread.start_new_thread(measure_realtime_temps, ())
 print('Thread task initialized')
 
 # 1. Connect to WiFi (scan AP, and connect with password)
@@ -138,17 +146,20 @@ print('AP started')
 ap_ip_addr = wifi.get_ap_ip_addr()
 print('AP IP: ' + ap_ip_addr)
 # get the Station IP of ESP32 in the WLAN which ESP32 connects to
-sta_ip_addr = wifi.sta_connect(settings['wifi']['ssid'], settings['wifi']['pass'])
-if sta_ip_addr:
-    print('STA IP: ' + sta_ip_addr)
+if settings['wifi']['ssid'] and settings['wifi']['pass']:
+    sta_ip_addr = wifi.sta_connect(settings['wifi']['ssid'], settings['wifi']['pass'])
+    if sta_ip_addr:
+        print('STA IP: ' + sta_ip_addr)
 print('--------------------')
 
-rtc = RealTimeClock()
+rtc = RealTimeClock(tz=8)
 print('RTC initialized')
-utime.sleep(5)
+utime.sleep(3)
 if wifi.is_connected():
+    print('Syncing RTC...')
     rtc.sync()
-    print('RTC synced')
+print(rtc.get_localdate())
+print(rtc.get_localtime())
 print('--------------------')
 
 # Set up HTTP server
@@ -159,5 +170,22 @@ print('HTTP service started')
 print('--------------------')
 led.set_color('green')  # 初始化全部完成后设置为绿色，表示处于待机状态
 
-network.ftp.start(user="micro", password="python", buffsize=1024, timeout=300)
-network.telnet.start(user="micro", password="python", timeout=300)
+# Set up DNS Server
+if MicroDNSSrv.Create({'*': '192.168.4.1'}):
+    print("MicroDNSSrv started.")
+else:
+    print("Error to start MicroDNSSrv...")
+print('--------------------')
+
+# Check if the crash recovery is needed
+if recovery.is_needed():
+    print('Recovering the fermentation process...')
+    print('--------------------')
+    process_info = recovery.retrieve_backup()
+    beer_name = process_info['beerName']
+    fermentation_steps = process_info['fermentationSteps']
+    current_step_index = process_info['currentFermentationStepIndex']
+    recovered_hours_to_go = process_info['stepHoursLeft']
+    main_process.set_beer_name(beer_name)
+    main_process.load_steps(fermentation_steps)
+    main_process.start(step_index=current_step_index, recovered_hours_to_go=recovered_hours_to_go)
