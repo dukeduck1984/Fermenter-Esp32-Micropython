@@ -1,5 +1,5 @@
 # fermenter_esp32_micropython
-Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPython Loboris fork
+Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPython ESP32 port (https://github.com/micropython/micropython)
 
 ### 首页
 - [X] 显示冰箱环境温度（mdi-fridge-outline）
@@ -13,8 +13,10 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 - [X] 待机时：可编辑所酿酒的名称（mdi-beer）、发酵步骤，包括发酵时长（天）（mdi-calendar-clock）、发酵目标温度（mdi-temperature-celsius）。至少需要一个发酵步骤才能启动发酵工作状态。
 - [X] 发酵中：显示全部发酵步骤，标识出已完成（mdi-check-circle）、进行中（大于零小于十五mdi-circle-slice-1，十五到三十mdi-circle-slice-2，三十到四十五mdi-circle-slice-3，四十五到五十五mdi-circle-slice-4，五十五到七十mdi-circle-slice-5，七十到八十五mdi-circle-slice-6，大于八十五小于一百mdi-circle-slice-7）、未完成（mdi-circle-outline）的步骤；结合进度条显示当前步骤完成进度百分比，显示当前步骤剩余天数和小时数。
 - [X] 发酵完成：弹出提示框表示已经完成。
-- [ ] 记录温度和时间数据到tf卡，显示温度折线图
-- [ ] 记录糖度比重数据，显示比重折线图
+- [ ] 每15分钟记录温度和时间数据到tf卡，显示温度折线图
+- [ ] 每20分钟记录1次糖度比重数据，显示比重折线图
+- [X] 所发酵的啤酒名称beerName也回传到后台进行记录
+- [X] 增加意外重启后自动恢复执行剩下的发酵步骤。如：每5分钟保存一次发酵信息：全部发酵步骤，正在发酵的步骤及剩余时间，未完成的步骤 etc.
 
 ### 设置页
 - [X] 设置ESP32自己的SSID
@@ -23,6 +25,9 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 - [X] 设置酒厂名称
 
 ### API
+#### /connecttest
+* GET  // 每5秒联系一次后台，确认通讯正常
+
 #### /overview
 * GET  // 每1分钟从后台更新一次数据
 ```
@@ -60,9 +65,10 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 ```
 
 #### /fermentation
-* POST  // 向后端发送发酵步骤
+* POST  // 向后端发送发酵步骤，并开始发酵过程
 ```
 {
+  beerName: "Two-hearted IPA",
   fermentationSteps: [  // array, 发酵步骤
     {
       days: 2,  // number, 天数
@@ -135,3 +141,55 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
   },
 }
 ```
+
+#### /wifi
+* GET  // 刷新WiFi热点列表
+```
+{
+    "wifiList": [
+        "210",
+        "ChinaNet-bAuq",
+        "211",
+        "209",
+        "212",
+        "236",
+        "226",
+        "202",
+        "ChinaNet-JwDr",
+        "208",
+        "203",
+        "225",
+        "ChinaNet-4dct",
+        "215",
+        "ChinaNet-hums"
+    ]
+}
+```
+* POST  // 切换所连接的AP
+```
+{
+    "ssid": "210",
+    "pass": "88888888"
+}
+```
+
+#### /tempsensors
+* POST  // 重新设置ds18温感设备编号，并返回温度值
+```
+{
+  "wortSensorDev": {
+    "value": 1,
+    "label": "0x28aa34e41813023b"
+  },
+  "chamberSensorDev": {
+    "value": 0,
+    "label": "0x28aaec0119130238"
+  },
+}
+```
+
+#### /abort
+* GET  // 终止发酵过程，删除恢复文件
+
+#### /reboot
+* GET  // 3秒后重新启动ESP32
