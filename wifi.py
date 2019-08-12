@@ -53,7 +53,7 @@ class WiFi:
         """
         scanned_wifi = self.sta.scan()
         wifi_list = [str(wifi[0], 'utf8') for wifi in scanned_wifi]
-        return wifi_list
+        return list(set(wifi_list))
 
     def sta_connect(self, ap_ssid, ap_pass):
         """
