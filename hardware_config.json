@@ -3,9 +3,9 @@
   "cooler_pin": 18,
   "heater_pin": 23,
   "rgb_pins": {
-    "r_pin": 2,
-    "g_pin": 5,
-    "b_pin": 4
+    "r_pin": 27,
+    "g_pin": 19,
+    "b_pin": 22
   },
   "cooler_interval": 300,
   "heater_interval": 0

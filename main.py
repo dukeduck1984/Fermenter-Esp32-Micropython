@@ -1,7 +1,8 @@
 import _thread
 
+import esp
 import machine
-import network
+import uos
 import ujson
 import utime
 
@@ -45,6 +46,9 @@ from wifi import WiFi
 #     }
 #################################################################################################
 
+# disable os debug info
+esp.osdebug(None)
+
 # get settings from JSON file
 print('--------------------')
 print('Loading settings and configurations...')
@@ -60,9 +64,16 @@ settings = ujson.loads(json)
 print('File user_settings.json has been loaded!')
 print('--------------------')
 
-# change and save settings will overwrite the hardware_config.json file and reset the machine (machine.reset())
-# only change and save the fermenting stages setting will NOT reset the machine, and will take effect immediately
-
+# initialize and mount SD card, the front end GUI is stored in SD card
+try:
+    sd = machine.SDCard(slot=2, mosi=15, miso=2, sck=14, cs=13)
+    uos.mount(sd, '/sd')
+except:
+    print('Failed to initialize the SD Card')
+    print('--------------------')
+else:
+    print('SD Card initialized and mounted')
+    print('--------------------')
 
 # initialize onewire devices
 temp_sensors = Ds18Sensors(pin=config['onewire_pin'])
@@ -166,13 +177,15 @@ print('--------------------')
 web = HttpServer(main_process, wifi, rtc, settings)
 print('HTTP server initialized')
 web.start()
-print('HTTP service started')
+utime.sleep(3)
+if web.is_started():
+    print('HTTP service started')
 print('--------------------')
 led.set_color('green')  # 初始化全部完成后设置为绿色，表示处于待机状态
 
 # Set up DNS Server
 if MicroDNSSrv.Create({'*': '192.168.4.1'}):
-    print("MicroDNSSrv started.")
+    print("DNS service started.")
 else:
     print("Error to start MicroDNSSrv...")
 print('--------------------')

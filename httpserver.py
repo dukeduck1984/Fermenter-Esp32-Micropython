@@ -66,8 +66,8 @@ class HttpServer:
                 process.load_steps(fermentationSteps)
                 process.start()
             except:
-                # throw 501 error code
-                httpResponse.WriteResponseNotImplemented()
+                # throw 500 error code
+                httpResponse.WriteResponseInternalServerError()
             else:
                 httpResponse.WriteResponseOk()
 
@@ -76,8 +76,8 @@ class HttpServer:
             try:
                 process.abort()
             except:
-                # throw 501 error code
-                httpResponse.WriteResponseNotImplemented()
+                # throw 500 error code
+                httpResponse.WriteResponseInternalServerError()
             else:
                 httpResponse.WriteResponseOk()
 
@@ -141,7 +141,7 @@ class HttpServer:
                 with open('user_settings.json', 'w') as f:
                     ujson.dump(settings_dict, f)
             except:
-                httpResponse.WriteResponseNotImplemented()
+                httpResponse.WriteResponseInternalServerError()
             else:
                 httpResponse.WriteResponseOk()
 
@@ -151,7 +151,7 @@ class HttpServer:
             try:
                 tim.init(period=3000, mode=machine.Timer.ONE_SHOT, callback=lambda t: machine.reset())
             except:
-                httpResponse.WriteResponseNotImplemented()
+                httpResponse.WriteResponseInternalServerError()
             else:
                 httpResponse.WriteResponseOk()
 
@@ -179,16 +179,15 @@ class HttpServer:
             # wifi_detail_json = httpClient.ReadRequestContentAsJSON()
             # wifi_dict = ujson.loads(wifi_detail_json)
             wifi_dict = httpClient.ReadRequestContentAsJSON()
-            wifi.sta_connect(wifi_dict['ssid'], wifi_dict['pass'])
-            utime.sleep(3)
-            if wifi.is_connected():
-                # 200
-                httpResponse.WriteResponseOk()
+            new_ip = wifi.sta_connect(wifi_dict['ssid'], wifi_dict['pass'])
+            if new_ip:
                 if not rtc.is_synced():
                     rtc.sync()
+                # 200
+                httpResponse.WriteResponseOk()
             else:
-                # throw 501 error code
-                httpResponse.WriteResponseNotImplemented()
+                # throw 500 error code
+                httpResponse.WriteResponseInternalServerError()
 
         @MicroWebSrv.route('/tempsensors', 'POST')
         def temp_post(httpClient, httpResponse):
@@ -212,8 +211,8 @@ class HttpServer:
                 wort_temp = wort_sensor.read_temp()
                 chamber_temp = chamber_sensor.read_temp()
             except:
-                # throw 501 error code
-                httpResponse.WriteResponseNotImplemented()
+                # throw 500 error code
+                httpResponse.WriteResponseInternalServerError()
             else:
                 temp_dict = {
                     'wortTemp': wort_temp,
@@ -228,8 +227,12 @@ class HttpServer:
             pass
 
         # Initialize the Web server
-        self.app = MicroWebSrv(webPath='/www')
+        self.app = MicroWebSrv(webPath='/sd/www')
         self.app.Start(threaded=True)  # Starts the server
+
+    def stop(self):
+        if self.app:
+            self.app.Stop()
 
     def is_started(self):
         if self.app:

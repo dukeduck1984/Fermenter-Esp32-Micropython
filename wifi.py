@@ -10,6 +10,8 @@ class WiFi:
         self.sta = network.WLAN(network.STA_IF)  # Start STA mode
         utime.sleep_ms(200)
         self.sta.active(True)
+        self.ssid = None
+        self.pwd = None
 
     def ap_start(self, ssid):
         """
@@ -58,16 +60,44 @@ class WiFi:
         Connect to an Access Point by its SSID and Password
         return: string; the IP of the STA
         """
-        # TODO: 一旦密码输错，会无线循环尝试重新连接，需要修正
-        if self.is_connected():
-            self.sta.disconnect()
-        try:
-            self.sta.connect(ap_ssid, ap_pass)
-        except:
-            pass
+        # Attempt connection only if SSID can be found
+        if ap_ssid in self.scan_wifi_list():
+            # Disconnect current wifi network
+            if self.sta.isconnected():
+                print('Disconnecting from current network...')
+                self.sta.disconnect()
+                utime.sleep(1)
+                self.sta.active(False)
+                utime.sleep_ms(200)
+                self.sta.active(True)
+                utime.sleep_ms(200)
+            print('Connecting to "' + ap_ssid + '"...')
+            try:
+                self.sta.connect(ap_ssid, ap_pass)
+            except:
+                pass
+            utime.sleep(4)
+            if self.sta.isconnected():
+                print('Network "' + ap_ssid + '" Connected!')
+                # if successfully connected, store the SSID & Password
+                self.ssid = ap_ssid
+                self.pwd = ap_pass
+                return self.get_sta_ip_addr()
+            else:
+                # if not, restore the previous connection
+                if self.ssid and self.pwd:
+                    print('Unable to connect "' + ap_ssid + '"')
+                    print('Restore the connection with "' + self.ssid + '"')
+                    try:
+                        self.sta.connect(self.ssid, self.pwd)
+                    except:
+                        pass
+                else:
+                    print('Unable to connect "' + ap_ssid + '"')
+                    return None
         else:
-            utime.sleep(2)
-            return self.get_sta_ip_addr()
+            print('Network "' + ap_ssid + '" does not present')
+            return None
 
     def is_connected(self):
         return self.sta.isconnected()

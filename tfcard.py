@@ -11,7 +11,10 @@ https://github.com/micropython/micropython/issues/4722
     using an SPI interface and the Python sdcard module. 
     On the TTGO T8 all you should need is:
 """
-uos.mount(machine.SDCard(), "/sd")
+sd = machine.SDCard(slot=2, mosi=15, miso=2, sck=14, cs=13)
+uos.mount(sd, '/sd')
+
+# uos.mount(machine.SDCard(), "/sd")
 
 # Below code works for Loboris fork for TTGO ESP32
 # uos.sdconfig(uos.SDMODE_1LINE)
