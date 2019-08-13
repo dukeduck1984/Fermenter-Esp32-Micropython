@@ -76,7 +76,7 @@ class WiFi:
                 self.sta.connect(ap_ssid, ap_pass)
             except:
                 pass
-            utime.sleep(4)
+            utime.sleep(5)
             if self.sta.isconnected():
                 print('Network "' + ap_ssid + '" Connected!')
                 # if successfully connected, store the SSID & Password
