@@ -1,7 +1,6 @@
 from microWebSrv import MicroWebSrv
 import machine
 import ujson
-import utime
 
 
 class HttpServer:
@@ -61,7 +60,7 @@ class HttpServer:
             this.set_temp = process_info.get('setTemp')
             this.chamber_temp = process_info.get('chamberTemp')
             this.wort_temp = process_info.get('wortTemp')
-            this.time_mark = utime.time()
+            this.time_mark = real_date + ' ' + real_time
             httpResponse.WriteResponseJSONOk(obj=data, headers=None)
 
         @MicroWebSrv.route('/fermentation', 'POST')
