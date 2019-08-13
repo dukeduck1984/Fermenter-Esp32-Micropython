@@ -1,6 +1,7 @@
 from microWebSrv import MicroWebSrv
 import machine
 import ujson
+import utime
 
 
 class HttpServer:
@@ -10,12 +11,22 @@ class HttpServer:
         self.rtc = rtc_obj
         self.settings = user_settings_dict
         self.app = None
+        self.hydrometer_data = {
+            'originalGravity': None,
+            'currentGravity': None,
+            'batteryLevel': None,
+        }
+        self.set_temp = None
+        self.chamber_temp = None
+        self.wort_temp = None
+        self.time_mark = None
 
     def start(self):
         process = self.process
         wifi = self.wifi
         rtc = self.rtc
         settings = self.settings
+        this = self
 
         @MicroWebSrv.route('/connecttest')
         def test_get(httpClient, httpResponse):
@@ -43,14 +54,15 @@ class HttpServer:
             process_info = process.get_process_info()
             overview = basic_info.copy()
             overview.update(process_info)
-            # overview_json = ujson.dumps(overview)
-            httpResponse.WriteResponseJSONOk(obj=overview, headers=None)
-            # httpResponse.WriteResponseOk(
-            #     headers = None,
-            #     contentType = "text/plain",
-            #     contentCharset = "UTF-8",
-            #     content = overview_json
-            # )
+            data = {
+                'fermenter_overview': overview,
+                'hydrometer_data': this.hydrometer_data
+            }
+            this.set_temp = process_info.get('setTemp')
+            this.chamber_temp = process_info.get('chamberTemp')
+            this.wort_temp = process_info.get('wortTemp')
+            this.time_mark = utime.time()
+            httpResponse.WriteResponseJSONOk(obj=data, headers=None)
 
         @MicroWebSrv.route('/fermentation', 'POST')
         def fermentation_post(httpClient, httpResponse):
@@ -195,8 +207,6 @@ class HttpServer:
             获取温度传感器读数
             """
             # 获取前端发来的设备序号
-            # dev_num_json = httpClient.ReadRequestContentAsJSON()
-            # sensor_dict = ujson.loads(dev_num_json)
             sensor_dict = httpClient.ReadRequestContentAsJSON()
             new_wort_dev_num = sensor_dict.get('wortSensorDev').get('value')
             new_chamber_dev_num = sensor_dict.get('chamberSensorDev').get('value')
@@ -218,13 +228,32 @@ class HttpServer:
                     'wortTemp': wort_temp,
                     'chamberTemp': chamber_temp
                 }
-                # temp_json = ujson.dumps(temp_dict)
                 httpResponse.WriteResponseJSONOk(obj=temp_dict, headers=None)
 
         @MicroWebSrv.route('/gravity', 'POST')
-        def gravity_get(httpClient, httpResponse):
-            # TODO 此接口用于数字比重计向发酵罐传递比重数据和电量信息，收到数据后触发回调函数
-            pass
+        def gravity_post(httpClient, httpResponse):
+            json = httpClient.ReadRequestContentAsJSON()
+            sg = json['sg']
+            battery = json['battery']
+            this.hydrometer_data['currentGravity'] = sg
+            this.hydrometer_data['batteryLevel'] = battery
+            if this.hydrometer_data.get('originalGravity'):
+                if float(this.hydrometer_data['originalGravity']) < sg:
+                    this.hydrometer_data['originalGravity'] = sg
+            else:
+                this.hydrometer_data['originalGravity'] = sg
+            httpResponse.WriteResponseOk()
+
+        @MicroWebSrv.route('/chart')
+        def chart_get(httpClient, httpResponse):
+            data = {
+                'timeMark': this.time_mark,
+                'setTemp': this.set_temp,
+                'wortTemp': this.wort_temp,
+                'chamberTemp': this.chamber_temp,
+                'gravitySG': this.hydrometer_data.get('currentGravity')
+            }
+            httpResponse.WriteResponseJSONOk(obj=data, headers=None)
 
         # Initialize the Web server
         self.app = MicroWebSrv(webPath='/sd/www')

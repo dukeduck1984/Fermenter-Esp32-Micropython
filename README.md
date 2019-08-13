@@ -32,35 +32,40 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 * GET  // 每1分钟从后台更新一次数据
 ```
 {
-  breweryName: "豚鼠精酿",  // string, 酒厂名称
-  machineStatus: "standby",  // string, 机器状态，standby待机，running正在发酵，done发酵完成
-  wifiConnected: true,  // boolean, 是否连接上了WIFI热点
-  realDate: "2019/7/25"  // string, 当前日期
-  realTime: "16:06",  // string, 当前时间
-  setTemp: 20.1,  // number, 目标设定温度
-  wortTemp: 21.4,  // number, 当前麦芽汁温度
-  chamberTemp: 18.3,  // number, 当前冰箱内环境温度
-  isHeating: false,  // boolean, 加热器是否开启
-  isCooling: true,  // boolean, 制冷压缩机是否开启
-  originalGravity: 1.345,  // number, 初始比重
-  currentGravity: 1.023,  // number, 当前比重
-  // beerName: "Two-Hearted IPA",  // string, 所酿啤酒的名称
-  //fermentationSteps: [  // array, 发酵步骤
-  //  {
-  //    days: 2,  // number, 天数
-  //    temp: 18.2  // number, 温度
-  //  },
-  //  {
-  //    days: 14,
-  //    temp: 20.5
-  //  },
-  //  {
-  //    days: 7,
-  //    temp: 22
-  //  }
-  //],
-  currentFermentationStepIndex: 0,  // number, 当前发酵步骤的index，从0开始计
-  currentFermentationStepPercentage: 74  // number, 当前发酵步骤的完成百分比
+  fermenter_overview : {
+    breweryName: "豚鼠精酿",  // string, 酒厂名称
+    machineStatus: "standby",  // string, 机器状态，standby待机，running正在发酵，done发酵完成
+    wifiIsConnected: true,  // boolean, 是否连接上了WIFI热点
+    realDate: "2019/7/25"  // string, 当前日期
+    realTime: "16:06",  // string, 当前时间
+    setTemp: 20.1,  // number, 目标设定温度
+    wortTemp: 21.4,  // number, 当前麦芽汁温度
+    chamberTemp: 18.3,  // number, 当前冰箱内环境温度
+    isHeating: false,  // boolean, 加热器是否开启
+    isCooling: true,  // boolean, 制冷压缩机是否开启
+    beerName: "Two-Hearted IPA",  // string, 所酿啤酒的名称
+    fermentationSteps: [  // array, 发酵步骤
+      {
+        days: 2,  // number, 天数
+        temp: 18.2  // number, 温度
+      },
+      {
+        days: 14,
+        temp: 20.5
+      },
+      {
+        days: 7,
+        temp: 22
+      }
+    ],
+    currentFermentationStepIndex: 0,  // number, 当前发酵步骤的index，从0开始计
+    currentFermentationStepPercentage: 74  // number, 当前发酵步骤的完成百分比
+  },
+  hydrometer_data: {
+    originalGravity: 1.035,
+    currentGravity: 1.017
+    batteryLevel: 60
+  }
 }
 ```
 
@@ -185,6 +190,27 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
     "value": 0,
     "label": "0x28aaec0119130238"
   },
+}
+```
+
+#### /gravity
+* POST  // 由比重计发送比重数据到发酵箱
+```
+{
+  "sg": 1.0123,
+  "battery": 67.6
+}
+```
+
+#### /chart
+* GET  // 供前端绘制曲线图的数据，由前端定时读取，数据存在前端
+```
+{
+  "timeMark": this.time_mark,
+  "setTemp": 21.5,
+  "wortTemp": 21.9,
+  "chamberTemp": 22.2,
+  "gravitySG": 1.0123
 }
 ```
 
