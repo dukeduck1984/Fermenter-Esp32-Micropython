@@ -242,6 +242,12 @@ class HttpServer:
                     this.hydrometer_data['originalGravity'] = sg
             else:
                 this.hydrometer_data['originalGravity'] = sg
+            try:
+                print('Hydrometer data received.')
+                print('SG: ' + str(round(sg, 3)))
+                print('Battery: ' + str(round(battery, 1)) + '%')
+            except:
+                pass
             httpResponse.WriteResponseOk()
 
         @MicroWebSrv.route('/chart')
@@ -251,7 +257,7 @@ class HttpServer:
                 'setTemp': this.set_temp,
                 'wortTemp': this.wort_temp,
                 'chamberTemp': this.chamber_temp,
-                'gravitySG': this.hydrometer_data.get('currentGravity')
+                'gravitySg': this.hydrometer_data.get('currentGravity')
             }
             httpResponse.WriteResponseJSONOk(obj=data, headers=None)
 

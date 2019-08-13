@@ -14,7 +14,7 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 - [X] 发酵中：显示全部发酵步骤，标识出已完成（mdi-check-circle）、进行中（大于零小于十五mdi-circle-slice-1，十五到三十mdi-circle-slice-2，三十到四十五mdi-circle-slice-3，四十五到五十五mdi-circle-slice-4，五十五到七十mdi-circle-slice-5，七十到八十五mdi-circle-slice-6，大于八十五小于一百mdi-circle-slice-7）、未完成（mdi-circle-outline）的步骤；结合进度条显示当前步骤完成进度百分比，显示当前步骤剩余天数和小时数。
 - [X] 发酵完成：弹出提示框表示已经完成。
 - [ ] 每15分钟记录温度和时间数据到tf卡，显示温度折线图
-- [ ] 每20分钟记录1次糖度比重数据，显示比重折线图
+- [X] 每20分钟记录1次糖度比重数据，显示比重折线图(从比重计端实现)
 - [X] 所发酵的啤酒名称beerName也回传到后台进行记录
 - [X] 增加意外重启后自动恢复执行剩下的发酵步骤。如：每5分钟保存一次发酵信息：全部发酵步骤，正在发酵的步骤及剩余时间，未完成的步骤 etc.
 
@@ -210,7 +210,7 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
   "setTemp": 21.5,
   "wortTemp": 21.9,
   "chamberTemp": 22.2,
-  "gravitySG": 1.0123
+  "gravitySg": 1.0123
 }
 ```
 
