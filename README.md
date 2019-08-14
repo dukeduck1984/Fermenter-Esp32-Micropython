@@ -219,3 +219,166 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 
 #### /reboot
 * GET  // 3秒后重新启动ESP32
+
+### 使用echarts绘图，示例代码
+```javascript
+var option = {
+    legend: {
+        data: [
+            {
+                name: '麦芽汁温度',
+                textStyle: {
+                    color: 'orangered'
+                }
+            },
+            {
+                name: '发酵箱温度',
+                textStyle: {
+                    color: 'dodgerblue'
+                }
+            },
+            {
+                name: '目标温度',
+                textStyle: {
+                    color: 'rebeccapurple'
+                }
+            },
+            {
+                name: '麦芽汁比重',
+                textStyle: {
+                    color: 'limegreen'
+                }
+            },
+        ]
+    },
+    tooltip: {
+        trigger: 'axis',
+    },
+    dataset: {
+        source: {
+            'timeMark': ['2018/4/1 20:45', '2018/4/8 21:00', '2018/04/15 21:15', '2018/04/22 21:30', '2018/04/29 21:45'],
+            'wortTemp': [19.2, 19.9, 20.3, 21.0, 21.5],
+            'chamberTemp': [20.3, 20.9, 21.1, 21.7, 22.0],
+            'setTemp': [22.5, 22.5, 22.5, 22.5, 22.5],
+            'gravitySg': [null, null, 1.065, 1.055, 1.035]
+        }
+    },
+    grid: {containLabel: true},
+    xAxis: {
+        type: 'time',
+        offset: 20,
+        name: '时 间',
+        nameLocation: 'center',
+        nameGap: 40,
+        nameTextStyle: {
+            fontSize: 20,
+            fontWeight: 'bold'
+        }
+    },
+    yAxis: [
+        {
+            type: 'value',
+            name: '温 度',
+            nameLocation: 'middle',
+            nameRotate: 360,
+            nameGap: 40,
+            nameTextStyle: {
+                fontSize: 20,
+                fontWeight: 'bold'
+            },
+            min: (value) => {return Math.floor(value.min - 1)},
+            max: (value) => {return Math.ceil(value.max + 1)},
+            minInterval: 0.5,
+            maxInterval: 1.5,
+            axisLabel: {
+                formatter: (value) => value.toFixed(1)
+            }
+        },
+        {
+            type: 'value',
+            name: '比 重',
+            nameLocation: 'middle',
+            nameRotate: 360,
+            nameGap: 45,
+            nameTextStyle: {
+                fontSize: 20,
+                fontWeight: 'bold'
+            },
+            min: (value) => {return (value.min * 0.99).toFixed(3)},
+            max: (value) => {return (value.max * 1.01).toFixed(3)},
+            splitLine: {
+                show: false,
+            },
+            minInterval: 0.002,
+            maxInterval: 0.008,
+            axisLabel: {
+                formatter: (value) => value.toFixed(3)
+            }
+        }
+    ],
+    series: [
+        {
+            name: '麦芽汁温度',
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              width: 3,
+              color: 'orangered'
+            },
+            itemStyle: {color: 'orangered'},
+            yAxisIndex: 0,
+            encode: {
+                // Map the "amount" column to X axis.
+                x: 'timeMark',
+                // Map the "product" column to Y axis
+                y: 'wortTemp'
+            }
+        },
+        {
+            name: '发酵箱温度',
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              width: 3,
+              color: 'dodgerblue'
+            },
+            itemStyle: {color: 'dodgerblue'},
+            yAxisIndex: 0,
+            encode: {
+                x: 'time',
+                y: 'chamberTemp'
+            }
+        },
+        {
+            name: '目标温度',
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              width: 3,
+              color: 'rebeccapurple'
+            },
+            itemStyle: {color: 'rebeccapurple'},
+            yAxisIndex: 0,
+            encode: {
+                x: 'time',
+                y: 'setTemp'
+            }
+        },
+        {
+            name: '麦芽汁比重',
+            type: 'line',
+            smooth: true,
+            yAxisIndex: 1,
+            lineStyle: {
+              width: 3,
+              color: 'limegreen'
+            },
+            itemStyle: {color: 'limegreen'},
+            encode: {
+                x: 'time',
+                y: 'gravitySg'
+            }
+        }
+    ]
+};
+```
