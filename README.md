@@ -206,7 +206,7 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 * GET  // 供前端绘制曲线图的数据，由前端定时读取，数据存在前端
 ```
 {
-  "timeMark": this.time_mark,
+  "timeMark": '2019/8/22 12:32',
   "setTemp": 21.5,
   "wortTemp": 21.9,
   "chamberTemp": 22.2,

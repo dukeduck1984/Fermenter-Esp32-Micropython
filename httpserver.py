@@ -57,6 +57,7 @@ class HttpServer:
                 'fermenter_overview': overview,
                 'hydrometer_data': this.hydrometer_data
             }
+            # 以下数据更新用于前端绘制echarts折线图
             this.set_temp = process_info.get('setTemp')
             this.chamber_temp = process_info.get('chamberTemp')
             this.wort_temp = process_info.get('wortTemp')
