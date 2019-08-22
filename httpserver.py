@@ -10,11 +10,7 @@ class HttpServer:
         self.rtc = rtc_obj
         self.settings = user_settings_dict
         self.app = None
-        self.hydrometer_data = {
-            'originalGravity': None,
-            'currentGravity': None,
-            'batteryLevel': None,
-        }
+        self.gravity_sg = None
         self.set_temp = None
         self.chamber_temp = None
         self.wort_temp = None
@@ -53,16 +49,13 @@ class HttpServer:
             process_info = process.get_process_info()
             overview = basic_info.copy()
             overview.update(process_info)
-            data = {
-                'fermenter_overview': overview,
-                'hydrometer_data': this.hydrometer_data
-            }
             # 以下数据更新用于前端绘制echarts折线图
             this.set_temp = process_info.get('setTemp')
             this.chamber_temp = process_info.get('chamberTemp')
             this.wort_temp = process_info.get('wortTemp')
+            this.gravity_sg = process_info.get('hydrometerData').get('currentGravity')
             this.time_mark = real_date + ' ' + real_time
-            httpResponse.WriteResponseJSONOk(obj=data, headers=None)
+            httpResponse.WriteResponseJSONOk(obj=overview, headers=None)
 
         @MicroWebSrv.route('/fermentation', 'POST')
         def fermentation_post(httpClient, httpResponse):
@@ -232,20 +225,12 @@ class HttpServer:
 
         @MicroWebSrv.route('/gravity', 'POST')
         def gravity_post(httpClient, httpResponse):
-            json = httpClient.ReadRequestContentAsJSON()
-            sg = json['sg']
-            battery = json['battery']
-            this.hydrometer_data['currentGravity'] = sg
-            this.hydrometer_data['batteryLevel'] = battery
-            if this.hydrometer_data.get('originalGravity'):
-                if float(this.hydrometer_data['originalGravity']) < sg:
-                    this.hydrometer_data['originalGravity'] = sg
-            else:
-                this.hydrometer_data['originalGravity'] = sg
+            hydrometer_dict = httpClient.ReadRequestContentAsJSON()
+            process.save_hydrometer_data(hydrometer_dict)
             try:
                 print('Hydrometer data received.')
-                print('SG: ' + str(round(sg, 3)))
-                print('Battery: ' + str(round(battery, 1)) + '%')
+                print('SG: ' + str(round(hydrometer_dict['sg'], 3)))
+                print('Battery: ' + str(round(hydrometer_dict['battery'], 1)) + '%')
             except:
                 pass
             httpResponse.WriteResponseOk()
@@ -257,7 +242,7 @@ class HttpServer:
                 'setTemp': this.set_temp,
                 'wortTemp': this.wort_temp,
                 'chamberTemp': this.chamber_temp,
-                'gravitySg': this.hydrometer_data.get('currentGravity')
+                'gravitySg': this.gravity_sg
             }
             httpResponse.WriteResponseJSONOk(obj=data, headers=None)
 

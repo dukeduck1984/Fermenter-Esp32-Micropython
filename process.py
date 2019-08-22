@@ -25,9 +25,23 @@ class Process:
         self.current_step_index = None
         self.step_hours = None
         self.step_target_temp = None
+        self.hydrometer_data = {
+            'originalGravity': None,
+            'currentGravity': None,
+            'batteryLevel': None
+        }
 
     def set_beer_name(self, beer_name):
         self.beer_name = beer_name
+
+    def save_hydrometer_data(self, hydrometer_dict_data):
+        if self.hydrometer_data.get('originalGravity'):
+            if self.hydrometer_data.get('originalGravity') < hydrometer_dict_data.get('sg'):
+                self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('sg')
+        else:
+            self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('sg')
+        self.hydrometer_data['currentGravity'] = hydrometer_dict_data.get('sg')
+        self.hydrometer_data['batteryLevel'] = hydrometer_dict_data.get('battery')
 
     def load_steps(self, fermentation_steps):
         """
@@ -182,6 +196,7 @@ class Process:
                 'totalHoursLeft': total_hours_left,  # float
                 'currentFermentationStepPercentage': step_percentage,  # int
                 'totalFermentationStepPercentage': total_percentage,  # int
+                'hydrometerData': self.hydrometer_data
             }
         else:
             machine_status = 'standby'
@@ -201,4 +216,5 @@ class Process:
                 'totalHoursLeft': None,
                 'currentFermentationStepPercentage': None,
                 'totalFermentationStepPercentage': None,
+                'hydrometerData': self.hydrometer_data
             }

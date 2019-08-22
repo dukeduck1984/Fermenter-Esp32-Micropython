@@ -32,7 +32,6 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 * GET  // 每1分钟从后台更新一次数据
 ```
 {
-  fermenter_overview : {
     breweryName: "豚鼠精酿",  // string, 酒厂名称
     machineStatus: "standby",  // string, 机器状态，standby待机，running正在发酵，done发酵完成
     wifiIsConnected: true,  // boolean, 是否连接上了WIFI热点
@@ -60,12 +59,11 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
     ],
     currentFermentationStepIndex: 0,  // number, 当前发酵步骤的index，从0开始计
     currentFermentationStepPercentage: 74  // number, 当前发酵步骤的完成百分比
-  },
-  hydrometer_data: {
-    originalGravity: 1.035,
-    currentGravity: 1.017
-    batteryLevel: 60
-  }
+    hydrometerData: {
+      originalGravity: 1.035,
+      currentGravity: 1.017
+      batteryLevel: 60
+    }
 }
 ```
 
