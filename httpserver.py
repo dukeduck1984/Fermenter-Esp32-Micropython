@@ -40,6 +40,7 @@ class HttpServer:
             wifi_connected = wifi.is_connected()
             real_date = rtc.get_localdate()
             real_time = rtc.get_localtime()
+            process.check_hydrometer_status()
             basic_info = {
                 'breweryName': brewery_name,
                 'wifiIsConnected': wifi_connected,
@@ -63,7 +64,6 @@ class HttpServer:
             前台向后台提交发酵步骤数据，并且开始发酵过程
             """
             json = httpClient.ReadRequestContentAsJSON()
-            # fermentationSteps = ujson.loads(json)['fermentationSteps']
             beerName = json['beerName']
             fermentationSteps = json['fermentationSteps']
             try:
@@ -229,8 +229,8 @@ class HttpServer:
             process.save_hydrometer_data(hydrometer_dict)
             try:
                 print('Hydrometer data received.')
-                print('SG: ' + str(round(hydrometer_dict['sg'], 3)))
-                print('Battery: ' + str(round(hydrometer_dict['battery'], 1)) + '%')
+                print('SG: ' + str(round(hydrometer_dict.get('currentGravity'), 3)))
+                print('Battery: ' + str(round(hydrometer_dict.get('batteryLevel'), 1)) + '%')
             except:
                 pass
             httpResponse.WriteResponseOk()

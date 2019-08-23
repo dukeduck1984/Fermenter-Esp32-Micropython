@@ -195,8 +195,9 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 * POST  // 由比重计发送比重数据到发酵箱
 ```
 {
-  "sg": 1.0123,
-  "battery": 67.6
+  "currentGravity": 1.0123,
+  "batteryLevel": 67.6,
+  "updateIntervalSec": 1200
 }
 ```
 

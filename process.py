@@ -30,18 +30,42 @@ class Process:
             'currentGravity': None,
             'batteryLevel': None
         }
+        self.hydrometer_status = {
+            'is_online': False,
+            'update_interval_sec': None,
+            'last_update_timestamp': None,
+        }
 
     def set_beer_name(self, beer_name):
         self.beer_name = beer_name
 
     def save_hydrometer_data(self, hydrometer_dict_data):
-        if self.hydrometer_data.get('originalGravity'):
-            if self.hydrometer_data.get('originalGravity') < hydrometer_dict_data.get('sg'):
-                self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('sg')
+        # 传入数据有updateIntervalSec代表数据来自比重计
+        if hydrometer_dict_data.get('updateIntervalSec'):
+            self.hydrometer_status['is_online'] = True
+            self.hydrometer_status['update_interval_sec'] = hydrometer_dict_data.get('updateIntervalSec')
+            self.hydrometer_status['last_update_timestamp'] = utime.time()
+            self.hydrometer_data['currentGravity'] = hydrometer_dict_data.get('currentGravity')
+            self.hydrometer_data['batteryLevel'] = hydrometer_dict_data.get('batteryLevel')
+            if self.hydrometer_data.get('originalGravity'):
+                if self.hydrometer_data.get('originalGravity') < hydrometer_dict_data.get('currentGravity'):
+                    self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('currentGravity')
+            else:
+                self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('currentGravity')
+        # 否则代表传入数据来自于意外重启的恢复数据
         else:
-            self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('sg')
-        self.hydrometer_data['currentGravity'] = hydrometer_dict_data.get('sg')
-        self.hydrometer_data['batteryLevel'] = hydrometer_dict_data.get('battery')
+            if hydrometer_dict_data.get('originalGravity'):
+                self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('originalGravity')
+
+    def check_hydrometer_status(self):
+        if self.hydrometer_status.get('is_online'):
+            now = utime.time()
+            timeout = self.hydrometer_status.get('update_interval_sec') * 2
+            last_time = self.hydrometer_status.get('last_update_timestamp')
+            if now - last_time > timeout:
+                self.hydrometer_status['is_online'] = False
+                self.hydrometer_data['currentGravity'] = None
+                self.hydrometer_data['batteryLevel'] = None
 
     def load_steps(self, fermentation_steps):
         """
