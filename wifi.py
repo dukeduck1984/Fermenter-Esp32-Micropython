@@ -59,6 +59,7 @@ class WiFi:
         return ap_ssid in self.scan_wifi_list()
 
     def sta_connect(self, ap_ssid, ap_pass, verify_ap=False):
+        # TODO verify_ap 有bug，待修复
         """
         Connect to an Access Point by its SSID and Password
         return: string; the IP of the STA

@@ -157,10 +157,9 @@ print('AP started')
 ap_ip_addr = wifi.get_ap_ip_addr()
 print('AP IP: ' + ap_ip_addr)
 # get the Station IP of ESP32 in the WLAN which ESP32 connects to
-if settings['wifi']['ssid'] and settings['wifi']['pass']:
-    sta_ip_addr = wifi.sta_connect(settings['wifi']['ssid'], settings['wifi']['pass'], verify_ap=True)
-    if sta_ip_addr:
-        print('STA IP: ' + sta_ip_addr)
+sta_ip_addr = wifi.sta_connect(settings['wifi']['ssid'], settings['wifi']['pass'], verify_ap=True)
+if sta_ip_addr:
+    print('STA IP: ' + sta_ip_addr)
 print('--------------------')
 
 rtc = RealTimeClock(tz=8)
