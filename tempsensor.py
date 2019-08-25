@@ -73,17 +73,15 @@ class Ds18Sensors:
 class SingleTempSensor:
     def __init__(self, ds_obj, device_number):
         self.ds_obj = ds_obj
-        if device_number + 1 <= self.ds_obj.get_device_qty():
-            self.bytearray_romcode = self.ds_obj.device_list[device_number]
-        else:
-            self.bytearray_romcode = None
-            print('Invalid Device Number!')
+        self.update_device_num(device_number)
 
     def read_temp(self):
         if not self.ds_obj.last_reading_available:
             self.ds_obj.get_realtime_temp()
         if self.bytearray_romcode:
             return round(self.ds_obj.ds.read_temp(self.bytearray_romcode), 1)
+        else:
+            return -99.9
 
     def update_device_num(self, new_device_number):
         if new_device_number + 1 <= self.ds_obj.get_device_qty():
