@@ -226,7 +226,7 @@ class Process:
             machine_status = 'standby'
             return {
                 'machineStatus': machine_status,  # str
-                'setTemp': None,
+                'setTemp': 20.0,
                 'wortTemp': wort_temp,
                 'chamberTemp': chamber_temp,
                 'isHeating': is_heating,  # bool
