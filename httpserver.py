@@ -167,22 +167,13 @@ class HttpServer:
             """
             wifi_list = wifi.scan_wifi_list()
             wifi_dict = {'wifiList': wifi_list}
-            # wifi_json = ujson.dumps(wifi_dict)
             httpResponse.WriteResponseJSONOk(obj=wifi_dict, headers=None)
-            # httpResponse.WriteResponseOk(
-            #     headers=None,
-            #     contentType="application/json",
-            #     contentCharset="UTF-8",
-            #     content=wifi_json
-            # )
 
         @MicroWebSrv.route('/wifi', 'POST')
         def wifi_post(httpClient, httpResponse):
             """
             连接WIFI热点，连接成功后同步RTC时钟
             """
-            # wifi_detail_json = httpClient.ReadRequestContentAsJSON()
-            # wifi_dict = ujson.loads(wifi_detail_json)
             wifi_dict = httpClient.ReadRequestContentAsJSON()
             new_ip = wifi.sta_connect(wifi_dict['ssid'], wifi_dict['pass'])
             if new_ip:
@@ -193,6 +184,21 @@ class HttpServer:
             else:
                 # throw 500 error code
                 httpResponse.WriteResponseInternalServerError()
+
+        @MicroWebSrv.route('/ip')
+        def ip_get(httpClient, httpResponse):
+            """
+            获取IP地址
+            """
+            ap_ip = wifi.get_ap_ip_addr()
+            sta_ip = wifi.get_sta_ip_addr()
+            sta_ssid = wifi.get_sta_ssid()
+            ip_dict = {
+                'apIp': ap_ip,
+                'staIp': sta_ip,
+                'staSsid': sta_ssid
+            }
+            httpResponse.WriteResponseJSONOk(obj=ip_dict, headers=None)
 
         @MicroWebSrv.route('/tempsensors', 'POST')
         def temp_post(httpClient, httpResponse):

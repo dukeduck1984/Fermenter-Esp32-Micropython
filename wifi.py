@@ -46,6 +46,12 @@ class WiFi:
         else:
             return None
 
+    def get_sta_ssid(self):
+        if self.sta.isconnected():
+            return self.sta.config('essid')
+        else:
+            return None
+
     def scan_wifi_list(self):
         """
         Scan and return a list of available Access Points
