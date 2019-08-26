@@ -50,6 +50,12 @@ class Actuator:
         """
         self.check_interval(0)
 
+    def force_on(self):
+        """
+        force turning on the actuator
+        """
+        self.action(1)
+
     def force_off(self):
         """
         force turning off the actuator

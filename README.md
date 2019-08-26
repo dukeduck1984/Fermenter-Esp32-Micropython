@@ -1,4 +1,4 @@
-# fermenter_esp32_micropython
+# Fermenter-Esp32-MicroPython
 Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPython ESP32 port (https://github.com/micropython/micropython)
 
 ### 首页
@@ -191,6 +191,15 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 }
 ```
 
+#### /actuator
+* POST  // 手动打开或者关闭制冷压缩机或者制热板，主要用于测试
+```
+{
+  "element": "heater",  // "cooler"
+  "action": true  // false
+}
+```
+
 #### /gravity
 * POST  // 由比重计发送比重数据到发酵箱
 ```
@@ -212,6 +221,9 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
   "gravitySg": 1.0123
 }
 ```
+
+#### /ftp
+* GET // 开启FTP服务，方便程序源代码升级
 
 #### /abort
 * GET  // 终止发酵过程，删除恢复文件

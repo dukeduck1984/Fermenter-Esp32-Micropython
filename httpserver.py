@@ -206,6 +206,47 @@ class HttpServer:
             }
             httpResponse.WriteResponseJSONOk(obj=ip_dict, headers=None)
 
+        @MicroWebSrv.route('/ftp')
+        def ftp_get(httpClient, httpResponse):
+            """
+            Start FTP service
+            """
+            print('Initializing FTP service...')
+            try:
+                import uftpd
+            except:
+                print('Failed to start FTP service.')
+                httpResponse.WriteResponseInternalServerError()
+            else:
+                print('FTP service has started.')
+                httpResponse.WriteResponseOk()
+
+        @MicroWebSrv.route('/actuator')
+        def actuactor_post(httpClient, httpResponse):
+            """
+            手动控制制冷压缩机或制热器，主要用于测试
+            """
+            actuactor_dict = httpClient.ReadRequestContentAsJSON()
+            try:
+                if actuactor_dict.get('element') == 'heater':
+                    element = process.fermenter_temp_ctrl.heater
+                    led_color = 'red'
+                else:
+                    element = process.fermenter_temp_ctrl.cooler
+                    led_color = 'blue'
+                led = process.fermenter_temp_ctrl.led
+                action = actuactor_dict.get('action')
+                if action:
+                    element.force_on()
+                    led.set_color(led_color)
+                else:
+                    element.force_off()
+                    led.set_color('green')
+            except:
+                httpResponse.WriteResponseInternalServerError()
+            else:
+                httpResponse.WriteResponseOk()
+
         @MicroWebSrv.route('/tempsensors', 'POST')
         def temp_post(httpClient, httpResponse):
             """
