@@ -65,7 +65,6 @@ class WiFi:
         return ap_ssid in self.scan_wifi_list()
 
     def sta_connect(self, ap_ssid, ap_pass, verify_ap=False):
-        # TODO verify_ap 有bug，待修复
         """
         Connect to an Access Point by its SSID and Password
         return: string; the IP of the STA
@@ -75,7 +74,6 @@ class WiFi:
             if not self.verify_ap(ap_ssid):
                 print('Network "' + ap_ssid + '" does not present')
                 return None
-
         # Disconnect current wifi network
         if self.sta.isconnected():
             print('Disconnecting from current network...')
@@ -93,7 +91,7 @@ class WiFi:
                 if self.ssid and self.pwd:
                     print('Restore the connection with "' + self.ssid + '"')
                     try:
-                        self.sta.connect(self.ssid, self.pwd)
+                        self.sta_connect(self.ssid, self.pwd)
                     except:
                         pass
                 else:
