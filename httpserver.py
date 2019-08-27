@@ -221,7 +221,7 @@ class HttpServer:
                 print('FTP service has started.')
                 httpResponse.WriteResponseOk()
 
-        @MicroWebSrv.route('/actuator')
+        @MicroWebSrv.route('/actuator', 'POST')
         def actuactor_post(httpClient, httpResponse):
             """
             手动控制制冷压缩机或制热器，主要用于测试
