@@ -220,6 +220,24 @@ class HttpServer:
                 print('FTP service has started.')
                 httpResponse.WriteResponseOk()
 
+        @MicroWebSrv.route('/mqtttest', 'POST')
+        def mqtt_post(httpClient, httpResponse):
+            """
+            Send test message to MQTT server
+            """
+            settings_dict = httpClient.ReadRequestContentAsJSON()
+            test_msg = ujson.dumps({'test-message': 200})
+            from mqtt_client import MQTT
+            try:
+                test_mqtt = MQTT(settings_dict)
+                test_mqtt.publish(test_msg)
+            except:
+                print('Failed to send the message to the MQTT broker.')
+                httpResponse.WriteResponseInternalServerError()
+            else:
+                print('The test message has been sent successfully.')
+                httpResponse.WriteResponseOk()
+
         @MicroWebSrv.route('/actuator', 'POST')
         def actuactor_post(httpClient, httpResponse):
             """
