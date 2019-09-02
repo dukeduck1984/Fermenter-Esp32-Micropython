@@ -17,6 +17,7 @@ Convert a fridge into a beer brewing fermenter with an ESP32 powered by MicroPyt
 - [X] 每20分钟记录1次糖度比重数据，显示比重折线图(从比重计端实现)
 - [X] 所发酵的啤酒名称beerName也回传到后台进行记录
 - [X] 增加意外重启后自动恢复执行剩下的发酵步骤。如：每5分钟保存一次发酵信息：全部发酵步骤，正在发酵的步骤及剩余时间，未完成的步骤 etc.
+- [X] 支持通过MQTT定时向第三方物联网平台发送发酵温度和比重数据
 
 ### 设置页
 - [X] 设置ESP32自己的SSID
