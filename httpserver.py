@@ -41,7 +41,6 @@ class HttpServer:
             wifi_connected = wifi.is_connected()
             real_date = rtc.get_localdate()
             real_time = rtc.get_localtime()
-            process.check_hydrometer_status()
             basic_info = {
                 'breweryName': brewery_name,
                 'wifiIsConnected': wifi_connected,
@@ -227,21 +226,28 @@ class HttpServer:
             手动控制制冷压缩机或制热器，主要用于测试
             """
             actuactor_dict = httpClient.ReadRequestContentAsJSON()
+            heater = process.fermenter_temp_ctrl.heater
+            cooler = process.fermenter_temp_ctrl.cooler
+            led = process.fermenter_temp_ctrl.led
             try:
                 if actuactor_dict.get('element') == 'heater':
-                    element = process.fermenter_temp_ctrl.heater
-                    led_color = 'red'
+                    element = heater
                 else:
-                    element = process.fermenter_temp_ctrl.cooler
-                    led_color = 'blue'
-                led = process.fermenter_temp_ctrl.led
+                    element = cooler
                 action = actuactor_dict.get('action')
                 if action:
                     element.force_on()
-                    led.set_color(led_color)
                 else:
                     element.force_off()
-                    led.set_color('green')
+                if heater.is_on() and not cooler.is_on():
+                    led_color = 'red'
+                elif not heater.is_on() and cooler.is_on():
+                    led_color = 'blue'
+                elif not heater.is_on() and not cooler.is_on():
+                    led_color = 'green'
+                else:
+                    led_color = 'orange'
+                led.set_color(led_color)
             except:
                 httpResponse.WriteResponseInternalServerError()
             else:

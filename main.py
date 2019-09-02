@@ -13,6 +13,7 @@ from fermenterpid import FermenterPID
 from httpserver import HttpServer
 from led import RgbLed
 from microDNSSrv import MicroDNSSrv
+from mqtt_client import MQTT
 from process import Process
 from rtc import RealTimeClock
 from tempsensor import Ds18Sensors, SingleTempSensor
@@ -119,11 +120,6 @@ recovery = CrashRecovery()
 print('Crash recovery initialized')
 print('--------------------')
 
-# initialize the fermentation process
-main_process = Process(fermenter_temp_ctrl, process_tim, recovery)
-print('Main process logic initialized')
-print('--------------------')
-
 
 def measure_realtime_temps():
     """
@@ -173,6 +169,16 @@ if wifi.is_connected():
     print(rtc.get_localtime())
 print('--------------------')
 
+# initialize the MQTT module
+mqtt = MQTT(settings)
+print('MQTT initialized')
+print('--------------------')
+
+# initialize the fermentation process
+main_process = Process(fermenter_temp_ctrl, process_tim, recovery, wifi, mqtt)
+print('Main process logic initialized')
+print('--------------------')
+
 # Set up HTTP server
 web = HttpServer(main_process, wifi, rtc, settings)
 print('HTTP server initialized')
@@ -194,12 +200,12 @@ print('--------------------')
 if recovery.is_needed():
     print('Recovering the fermentation process...')
     print('--------------------')
-    process_info = recovery.retrieve_backup()
-    beer_name = process_info['beerName']
-    fermentation_steps = process_info['fermentationSteps']
-    current_step_index = process_info['currentFermentationStepIndex']
-    recovered_hours_to_go = process_info['stepHoursLeft']
-    hydrometer_data = process_info['hydrometerData']
+    recovered_process_info = recovery.retrieve_backup()
+    beer_name = recovered_process_info['beerName']
+    fermentation_steps = recovered_process_info['fermentationSteps']
+    current_step_index = recovered_process_info['currentFermentationStepIndex']
+    recovered_hours_to_go = recovered_process_info['stepHoursLeft']
+    hydrometer_data = recovered_process_info['hydrometerData']
     main_process.set_beer_name(beer_name)
     main_process.save_hydrometer_data(hydrometer_data)
     main_process.load_steps(fermentation_steps)
