@@ -10,6 +10,7 @@ class RealTimeClock:
     hosts = [
         'ntp.aliyun.com',
         'ntp.ntsc.ac.cn',
+        'time1.cloud.tencent.com',
         'pool.ntp.org',
     ]
     def __init__(self, tz=8):
