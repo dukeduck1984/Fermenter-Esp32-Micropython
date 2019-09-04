@@ -13,15 +13,18 @@ class RealTimeClock:
         'time1.cloud.tencent.com',
         'pool.ntp.org',
     ]
-    def __init__(self, tz=8):
+
+    def __init__(self, tz=8, update_period=None):
         """
         初始化时钟
         :param tz: int； 与UTC的时差，如：北京时间为UTC+8
+        :param update_period: int； 与ntp服务器同步的频率，以秒计，如period=86400为每24小时同步一次
         """
         self.tz = int(tz)
         self.rtc = machine.RTC()
-        self.is_updated = False
         self.retry_counter = 0
+        self.period_ms = update_period * 1000
+        self.last_time = None
 
     def _time(self):
         NTP_QUERY = bytearray(48)
@@ -49,7 +52,7 @@ class RealTimeClock:
         else:
             raise Exception('Error: failed to connect to ntp servers.')
 
-    def sync(self):
+    def _ntp_sync(self):
         """
         与时钟服务器进行同步
         :return: None
@@ -66,22 +69,30 @@ class RealTimeClock:
                 print('Failed to sync RTC')
                 self.retry_counter = 0
         else:
-            self.is_updated = True
+            self.last_time = utime.ticks_ms()
             self.retry_counter = 0
             utc = self.rtc.datetime()
             self.rtc.datetime((utc[0], utc[1], utc[2], utc[3], utc[4] + self.tz, utc[5], utc[6], utc[7]))
             print('RTC Synced')
 
+    def sync(self):
+        if not self.last_time:
+            self._ntp_sync()
+        else:
+            if self.period_ms:
+                if utime.ticks_diff(utime.ticks_ms(), self.last_time) >= self.period_ms:
+                    self._ntp_sync()
+
     def is_synced(self):
-        return self.is_updated
+        return self.last_time is not None
 
     def get_localdate(self):
         """
         返回同步后的本地日期
         :return: str; "2019/7/25"
         """
-        if not self.is_updated:
-            self.sync()
+        if not self.last_time:
+            self._ntp_sync()
         year, month, day, _, _, _, _, _ = self.rtc.datetime()
         return str(year) + '/' + str(month) + '/' + str(day)
 
@@ -90,8 +101,8 @@ class RealTimeClock:
         返回同步后的本地时间
         :return: str; "19:30"
         """
-        if not self.is_updated:
-            self.sync()
+        if not self.last_time:
+            self._ntp_sync()
         _, _, _, _, hour, minute, _, _ = self.rtc.datetime()
         if minute < 10:
             minute = '0' + str(minute)
