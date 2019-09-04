@@ -25,6 +25,7 @@ class RealTimeClock:
         self.retry_counter = 0
         self.period_ms = update_period * 1000
         self.last_time = None
+        self.rtc_tim = None
 
     def _time(self):
         NTP_QUERY = bytearray(48)
@@ -78,10 +79,14 @@ class RealTimeClock:
     def sync(self):
         if not self.last_time:
             self._ntp_sync()
-        else:
-            if self.period_ms:
-                if utime.ticks_diff(utime.ticks_ms(), self.last_time) >= self.period_ms:
-                    self._ntp_sync()
+
+        if self.period_ms and not self.rtc_tim:
+            this = self
+            def rtc_tim_cb(t):
+                import _thread
+                rtc_th = _thread.start_new_thread(this._ntp_sync, ())
+            self.rtc_tim = machine.Timer(-1)
+            self.rtc_tim.init(period=self.period_ms, mode=machine.Timer.PERIODIC, callback=rtc_tim_cb)
 
     def is_synced(self):
         return self.last_time is not None
