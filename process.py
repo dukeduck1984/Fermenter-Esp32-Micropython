@@ -52,10 +52,7 @@ class Process:
             self.hydrometer_status['last_time'] = utime.ticks_ms()
             self.hydrometer_data['currentGravity'] = hydrometer_dict_data.get('currentGravity')
             self.hydrometer_data['batteryLevel'] = hydrometer_dict_data.get('batteryLevel')
-            if self.hydrometer_data.get('originalGravity'):
-                if self.hydrometer_data.get('originalGravity') < hydrometer_dict_data.get('currentGravity'):
-                    self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('currentGravity')
-            else:
+            if not self.hydrometer_data.get('originalGravity'):
                 self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('currentGravity')
         # 否则代表传入数据来自于意外重启的恢复数据
         else:
