@@ -159,6 +159,7 @@ if settings['wifi'].get('ssid'):
         print('STA IP: ' + sta_ip_addr)
 print('--------------------')
 
+# TODO: rtc 增加了update_period定时同步功能，待测试
 rtc = RealTimeClock(tz=8)
 print('RTC initialized')
 utime.sleep(3)

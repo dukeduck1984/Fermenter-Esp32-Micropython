@@ -14,11 +14,12 @@ class RealTimeClock:
         'pool.ntp.org',
     ]
 
-    def __init__(self, tz=8, update_period=None):
+    def __init__(self, tz=8, update_period=0):
         """
         初始化时钟
         :param tz: int； 与UTC的时差，如：北京时间为UTC+8
         :param update_period: int； 与ntp服务器同步的频率，以秒计，如period=86400为每24小时同步一次
+                                    小于300秒只同步一次
         """
         self.tz = int(tz)
         self.rtc = machine.RTC()
@@ -80,7 +81,7 @@ class RealTimeClock:
         if not self.last_time:
             self._ntp_sync()
 
-        if self.period_ms and not self.rtc_tim:
+        if self.period_ms >= 300000 and not self.rtc_tim:
             this = self
             def rtc_tim_cb(t):
                 import _thread
