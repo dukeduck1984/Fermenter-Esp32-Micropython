@@ -159,15 +159,13 @@ if settings['wifi'].get('ssid'):
         print('STA IP: ' + sta_ip_addr)
 print('--------------------')
 
-# TODO: rtc 增加了update_period定时同步功能，待测试
-rtc = RealTimeClock(tz=8)
+rtc = RealTimeClock(tz=8, update_period=86400)
 print('RTC initialized')
 utime.sleep(3)
-if wifi.is_connected():
-    print('Syncing RTC...')
-    rtc.sync()
-    print(rtc.get_localdate())
-    print(rtc.get_localtime())
+print('Syncing RTC...')
+rtc.sync()
+print(rtc.get_localdate())
+print(rtc.get_localtime())
 print('--------------------')
 
 # initialize the MQTT module

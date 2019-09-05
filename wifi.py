@@ -64,6 +64,11 @@ class WiFi:
     def verify_ap(self, ap_ssid):
         return ap_ssid in self.scan_wifi_list()
 
+    def sync_rtc_once(self):
+        from rtc import RealTimeClock
+        rtc = RealTimeClock(tz=8)
+        rtc.sync()
+
     def sta_connect(self, ap_ssid, ap_pass, verify_ap=False):
         """
         Connect to an Access Point by its SSID and Password
@@ -107,6 +112,8 @@ class WiFi:
             # if successfully connected, store the SSID & Password
             self.ssid = ap_ssid
             self.pwd = ap_pass
+            # sync RTC with NTP servers
+            self.sync_rtc_once()
             return self.get_sta_ip_addr()
 
     def is_connected(self):

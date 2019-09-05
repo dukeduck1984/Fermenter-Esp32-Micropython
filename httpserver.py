@@ -1,7 +1,6 @@
 from microWebSrv import MicroWebSrv
 import machine
 import ujson
-import utime
 
 
 class HttpServer:
@@ -172,7 +171,7 @@ class HttpServer:
         @MicroWebSrv.route('/wifi', 'POST')
         def wifi_post(httpClient, httpResponse):
             """
-            连接WIFI热点，连接成功后同步RTC时钟
+            连接WIFI热点
             """
             wifi_dict = httpClient.ReadRequestContentAsJSON()
             try:
@@ -181,9 +180,6 @@ class HttpServer:
                 httpResponse.WriteResponseInternalServerError()
             else:
                 if wifi.is_connected():
-                    if not rtc.is_synced():
-                        print('Syncing RTC...')
-                        rtc.sync()
                     print(new_ip)
                     httpResponse.WriteResponseOk()
                 else:

@@ -78,9 +78,7 @@ class RealTimeClock:
             print('RTC Synced')
 
     def sync(self):
-        if not self.last_time:
-            self._ntp_sync()
-
+        self._ntp_sync()
         if self.period_ms >= 300000 and not self.rtc_tim:
             this = self
             def rtc_tim_cb(t):
@@ -97,8 +95,6 @@ class RealTimeClock:
         返回同步后的本地日期
         :return: str; "2019/7/25"
         """
-        if not self.last_time:
-            self._ntp_sync()
         year, month, day, _, _, _, _, _ = self.rtc.datetime()
         return str(year) + '/' + str(month) + '/' + str(day)
 
@@ -107,8 +103,6 @@ class RealTimeClock:
         返回同步后的本地时间
         :return: str; "19:30"
         """
-        if not self.last_time:
-            self._ntp_sync()
         _, _, _, _, hour, minute, _, _ = self.rtc.datetime()
         if minute < 10:
             minute = '0' + str(minute)
