@@ -65,13 +65,13 @@ class Logger:
     def critical(self, msg, *args):
         self.log(CRITICAL, msg, *args)
 
-    def exc(self, e, msg, *args):
+    def exception(self, error, msg, *args):
         buf = uio.StringIO()
-        sys.print_exception(e, buf)
+        sys.print_exception(error, buf)
         self.log(ERROR, msg + "\n" + buf.getvalue(), *args)
 
-    def exception(self, msg, *args):
-        self.exc(sys.exc_info()[1], msg, *args)
+    # def exception(self, msg, *args):
+    #     self.exc(sys.exc_info()[1], msg, *args)
 
     def addHandler(self, hdlr):
         if self.handlers is None:
@@ -157,14 +157,16 @@ class FileHandler(Handler):
         self.filename = filename
 
         self._f = None
-        if not delay:
-            self._f = open(self.filename, self.mode)
+        # if not delay:
+        #     self._f = open(self.filename, self.mode)
 
     def emit(self, record):
-        if self._f is None:
-            self._f = open(self.filename, self.mode)
-
-        self._f.write(self.formatter.format(record) + self.terminator)
+        # if self._f is None:
+        #     self._f = open(self.filename, self.mode)
+        #
+        # self._f.write(self.formatter.format(record) + self.terminator)
+        with open(self.filename, self.mode) as f:
+            f.write(self.formatter.format(record) + self.terminator)
 
     def close(self):
         if self._f is not None:
