@@ -19,13 +19,14 @@ class Process:
         self.tim = control_timer_obj
         self.recovery = crash_recovery_obj
         self.wifi = wifi_obj
-        self.backup_interval = 300000
+        self.backup_interval = 300000  # 每5分钟备份一次
         self.last_backup = None
         self.mqtt = mqtt_obj
         self.last_publish = None
         self.total_steps = len(self.fermentation_steps) if self.fermentation_steps is not None else 0
         self.start_time = None
         self.elapsed_time = None
+        self.elapsed_before_recovery = 0
         self.is_completed = False
         self.current_step_index = None
         self.step_hours = None
@@ -64,7 +65,7 @@ class Process:
         check the stage progress
         """
         now = utime.time()
-        self.elapsed_time = now - self.start_time
+        self.elapsed_time = now - self.start_time + self.elapsed_before_recovery
         # keep the PID temp control logic going even after all steps have been completed
         self.fermenter_temp_ctrl.run(self.step_target_temp)
         # if stage time is up
@@ -116,24 +117,28 @@ class Process:
             set_temp = process_info.get('setTemp')
             wort_temp = process_info.get('wortTemp')
             chamber_temp = process_info.get('chamberTemp')
+            step_percentage = process_info.get('currentFermentationStepPercentage')
+            total_percentage = process_info.get('totalFermentationStepPercentage')
             og = process_info.get('hydrometerData').get('originalGravity')
             sg = process_info.get('hydrometerData').get('currentGravity')
             battery = process_info.get('hydrometerData').get('batteryLevel')
+            basic_msg = {
+                "set_temp": set_temp,
+                "wort_temp": wort_temp,
+                "chamber_temp": chamber_temp,
+                "step_percentage": step_percentage,
+                "total_percentage": total_percentage
+            }
             if sg:
-                mqtt_msg = ujson.dumps({
-                    "set_temp": set_temp,
-                    "wort_temp": wort_temp,
-                    "chamber_temp": chamber_temp,
+                combined_msg = basic_msg.copy()
+                combined_msg.update({
                     "original_gravity": round(og, 3),
                     "specific_gravity": round(sg, 3),
                     "battery_percentage": battery
                 })
+                mqtt_msg = ujson.dumps(combined_msg)
             else:
-                mqtt_msg = ujson.dumps({
-                    "set_temp": set_temp,
-                    "wort_temp": wort_temp,
-                    "chamber_temp": chamber_temp
-                })
+                mqtt_msg = ujson.dumps(basic_msg)
             if not self.last_publish:
                 self.mqtt.publish(mqtt_msg)
                 self.last_publish = utime.ticks_ms()
@@ -162,7 +167,7 @@ class Process:
         self.fermentation_steps = fermentation_steps
         self.total_steps = len(self.fermentation_steps)
 
-    def start(self, step_index=0, recovered_hours_to_go=None):
+    def start(self, step_index=0, step_hours_left=None):
         """
         pass stage index to get stage settings and start the timer
         the timer calls temperature control & stage check function
@@ -172,14 +177,13 @@ class Process:
         if self.fermentation_steps:
             self.current_step_index = step_index
             step_settings = self.fermentation_steps[step_index]
-            if recovered_hours_to_go:
-                self.step_hours = float(recovered_hours_to_go)
-            else:
-                self.step_hours = float(step_settings['days'] * 24)
+            self.step_hours = float(step_settings['days'] * 24)
             self.step_target_temp = float(step_settings['temp'])
-
+            if step_hours_left:
+                self.elapsed_before_recovery = int((self.step_hours - float(step_hours_left)) * 3600)
+            else:
+                self.elapsed_before_recovery = 0
             self.start_time = utime.time()
-
             self.tim.deinit()
             utime.sleep_ms(100)
             self.tim.init(period=5000, mode=machine.Timer.PERIODIC, callback=self.job_queue)

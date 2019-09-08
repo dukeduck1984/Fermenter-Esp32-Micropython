@@ -203,9 +203,9 @@ if recovery.is_needed():
     beer_name = recovered_process_info['beerName']
     fermentation_steps = recovered_process_info['fermentationSteps']
     current_step_index = recovered_process_info['currentFermentationStepIndex']
-    recovered_hours_to_go = recovered_process_info['stepHoursLeft']
+    step_hours_left = recovered_process_info['stepHoursLeft']
     hydrometer_data = recovered_process_info['hydrometerData']
     main_process.set_beer_name(beer_name)
     main_process.save_hydrometer_data(hydrometer_data)
     main_process.load_steps(fermentation_steps)
-    main_process.start(step_index=current_step_index, recovered_hours_to_go=recovered_hours_to_go)
+    main_process.start(step_index=current_step_index, step_hours_left=step_hours_left)
