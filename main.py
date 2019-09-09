@@ -1,6 +1,7 @@
 import _thread
 
 import esp
+import logging
 import machine
 import uos
 import ujson
@@ -12,6 +13,7 @@ from crash_recovery import CrashRecovery
 from fermenterpid import FermenterPID
 from httpserver import HttpServer
 from led import RgbLed
+from logger import init_logger
 from microDNSSrv import MicroDNSSrv
 from mqtt_client import MQTT
 from process import Process
@@ -46,6 +48,9 @@ from wifi import WiFi
 #     'wifi': {'ssid': '28#301', 'pass': '1318028301'},
 #     }
 #################################################################################################
+
+logging.basicConfig(level=logging.INFO)
+logger = init_logger(__name__)
 
 # disable os debug info
 esp.osdebug(None)

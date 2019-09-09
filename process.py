@@ -112,7 +112,7 @@ class Process:
                 do_backup()
 
     def _publish_mqtt(self):
-        if self.has_started() and not self.has_completed() and self.mqtt.is_enabled() and self.wifi.is_connected():
+        if self.has_started() and self.mqtt.is_enabled() and self.wifi.is_connected():
             process_info = self.get_process_info()
             set_temp = process_info.get('setTemp')
             wort_temp = process_info.get('wortTemp')
@@ -146,6 +146,9 @@ class Process:
                 if utime.ticks_diff(utime.ticks_ms(), self.last_publish) >= self.mqtt.get_update_interval_ms():
                     self.mqtt.publish(mqtt_msg)
                     self.last_publish = utime.ticks_ms()
+        if self.has_completed():
+            self.mqtt.manually_disable()
+
 
     def job_queue(self, t):
         # 1. 发酵温度控制（每5秒）

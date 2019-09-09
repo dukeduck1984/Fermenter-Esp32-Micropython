@@ -22,6 +22,12 @@ class MQTT:
     def is_enabled(self):
         return self.enabled
 
+    def manually_enable(self):
+        self.enabled = True
+
+    def manually_disable(self):
+        self.enabled = False
+
     def get_update_interval_ms(self):
         return self.interval_ms
 
