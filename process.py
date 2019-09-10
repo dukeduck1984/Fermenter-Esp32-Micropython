@@ -78,8 +78,7 @@ class Process:
             # if this is the end of the final stage
             else:
                 self.is_completed = True
-                self.fermenter_temp_ctrl.job_done = True
-                self.fermenter_temp_ctrl.led.set_color('orange')
+                self.fermenter_temp_ctrl.accomplished()
                 print('All fermentation stages have completed.')
 
     def _check_hydrometer_status(self):
@@ -146,7 +145,8 @@ class Process:
                 if utime.ticks_diff(utime.ticks_ms(), self.last_publish) >= self.mqtt.get_update_interval_ms():
                     self.mqtt.publish(mqtt_msg)
                     self.last_publish = utime.ticks_ms()
-        if self.has_completed():
+        # 如果全部发酵步骤完成，则关闭mqtt
+        if self.has_completed() and self.mqtt.is_enabled():
             self.mqtt.manually_disable()
 
 
