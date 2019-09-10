@@ -19,7 +19,7 @@ class Process:
         self.tim = control_timer_obj
         self.recovery = crash_recovery_obj
         self.wifi = wifi_obj
-        self.backup_interval = 300000  # 每5分钟备份一次
+        self.backup_interval = self.recovery.get_interval_ms()
         self.last_backup = None
         self.mqtt = mqtt_obj
         self.last_publish = None
