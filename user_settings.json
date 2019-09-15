@@ -11,7 +11,7 @@
     "enabled": false,
     "brokerAddr": "things.ubidots.com",
     "brokerPort": 1883,
-    "username": "A1E-ULJCw8ETOOXSdxUtXvVYzjaiXaGqX0",
+    "username": "YOUR-UBIDOTStokenHERE",
     "password": "",
     "topic": "/v1.6/devices/fermenter",
     "pubIntervalMs": 900000
