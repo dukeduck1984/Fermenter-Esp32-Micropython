@@ -138,6 +138,7 @@ class Process:
                 mqtt_msg = ujson.dumps(combined_msg)
             else:
                 mqtt_msg = ujson.dumps(basic_msg)
+
             if not self.last_publish:
                 self.mqtt.publish(mqtt_msg)
                 self.last_publish = utime.ticks_ms()
@@ -145,10 +146,10 @@ class Process:
                 if utime.ticks_diff(utime.ticks_ms(), self.last_publish) >= self.mqtt.get_update_interval_ms():
                     self.mqtt.publish(mqtt_msg)
                     self.last_publish = utime.ticks_ms()
-        # 如果全部发酵步骤完成，则关闭mqtt
-        if self.has_completed() and self.mqtt.is_enabled():
-            self.mqtt.manually_disable()
-
+                    # 如果全部发酵步骤完成，则关闭mqtt
+                    # 此处确保mqtt会在发送完100%的进度后才关闭
+                    if self.has_completed():
+                        self.mqtt.manually_disable()
 
     def job_queue(self, t):
         # 1. 发酵温度控制（每5秒）
