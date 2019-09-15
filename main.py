@@ -21,33 +21,6 @@ from rtc import RealTimeClock
 from tempsensor import Ds18Sensors, SingleTempSensor
 from wifi import WiFi
 
-##################################   MACHINE HARDWARE CONFIG   #################################
-# config = {
-#     # GPio pin numbers
-#     'onewire_pin': 25,
-#     'cooler_pin': 18,
-#     'heater_pin': 23,
-#     'rgb_pins': {'r_pin': 2, 'g_pin': 0, 'b_pin': 4},
-#     # Cooler on/off interval in seconds
-#     'cooler_interval': 300,
-#     # Heater on/off interval in seconds
-#     'heater_interval': 0,
-#     }
-#################################################################################################
-
-
-#######################################   USER SETTINGS   #######################################
-# settings = {
-#     'breweryName': '豚鼠精酿',
-#     # Sensor device num
-#     'wortSensorDev': 0,
-#     'chamberSensorDev': 1,
-#     # SSID for AP mode
-#     'apSsid': 'Fermenter',
-#     # ssid & password of AP (eg. a wireless router)
-#     'wifi': {'ssid': '28#301', 'pass': '1318028301'},
-#     }
-#################################################################################################
 
 logging.basicConfig(level=logging.INFO)
 logger = init_logger(__name__)
@@ -108,7 +81,7 @@ print('LED initialized')
 print('--------------------')
 
 # create a PID instance
-pid = FermenterPID()
+pid = FermenterPID(kp=settings['pid']['kp'], ki=settings['pid']['ki'], kd=settings['pid']['kd'])
 print('PID logic initialized')
 print('--------------------')
 

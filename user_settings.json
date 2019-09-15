@@ -15,5 +15,10 @@
     "password": "",
     "topic": "/v1.6/devices/fermenter",
     "pubIntervalMs": 900000
+  },
+  "pid": {
+    "kp": 2,
+    "ki": 0.0001,
+    "kd": 2
   }
 }
