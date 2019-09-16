@@ -1,7 +1,7 @@
 {
   "breweryName": "豚鼠精酿",
-  "wortSensorDev": 0,
-  "chamberSensorDev": 1,
+  "wortSensorDev": 1,
+  "chamberSensorDev": 0,
   "apSsid": "Fermenter",
   "wifi": {
     "ssid": "",
@@ -11,7 +11,7 @@
     "enabled": false,
     "brokerAddr": "things.ubidots.com",
     "brokerPort": 1883,
-    "username": "YOUR-UBIDOTStokenHERE",
+    "username": "Your-UbidotsTokenHere",
     "password": "",
     "topic": "/v1.6/devices/fermenter",
     "pubIntervalMs": 900000
