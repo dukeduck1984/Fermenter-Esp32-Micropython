@@ -3,7 +3,7 @@ import utime
 
 
 class WiFi:
-    def __init__(self):
+    def __init__(self, rtc_obj=None):
         self.ap_ip_addr = None
         self.sta_ip_addr = None
         self.ap = network.WLAN(network.AP_IF)  # Start AP mode
@@ -12,6 +12,7 @@ class WiFi:
         self.sta.active(True)
         self.ssid = None
         self.pwd = None
+        self.rtc = rtc_obj
 
     def ap_start(self, ssid):
         """
@@ -64,10 +65,9 @@ class WiFi:
     def verify_ap(self, ap_ssid):
         return ap_ssid in self.scan_wifi_list()
 
-    def sync_rtc_once(self):
-        from rtc import RealTimeClock
-        rtc = RealTimeClock(tz=8)
-        rtc.sync()
+    def sync_rtc(self):
+        if self.rtc:
+            self.rtc.sync()
 
     def sta_connect(self, ap_ssid, ap_pass, verify_ap=False):
         """
@@ -87,9 +87,9 @@ class WiFi:
             self.sta.active(False)
             utime.sleep_ms(200)
             self.sta.active(True)
-            utime.sleep_ms(200)
+            utime.sleep_ms(100)
         start = utime.ticks_ms()
-        timeout = 10000
+        timeout = 12000  # set timeout to 12s
         while not self.sta.isconnected():
             if utime.ticks_diff(utime.ticks_ms(), start) > timeout:
                 print('Connecting to "' + ap_ssid + '" Timeout')
@@ -113,7 +113,7 @@ class WiFi:
             self.ssid = ap_ssid
             self.pwd = ap_pass
             # sync RTC with NTP servers
-            self.sync_rtc_once()
+            self.sync_rtc()
             return self.get_sta_ip_addr()
 
     def is_connected(self):

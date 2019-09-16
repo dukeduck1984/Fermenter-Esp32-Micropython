@@ -121,8 +121,12 @@ print('Stack allocated')
 temp_th = _thread.start_new_thread(measure_realtime_temps, ())
 print('Thread task initialized')
 
-# 1. Connect to WiFi (scan AP, and connect with password)
-wifi = WiFi()
+rtc = RealTimeClock(tz=8, update_period=86400)
+print('--------------------')
+print('RTC initialized')
+
+# Connect to WiFi (scan AP, and connect with password)
+wifi = WiFi(rtc_obj=rtc)
 print('--------------------')
 print('WiFi initialized')
 wifi.ap_start(settings['apSsid'])
@@ -136,12 +140,7 @@ if settings['wifi'].get('ssid'):
     if sta_ip_addr:
         print('STA IP: ' + sta_ip_addr)
 print('--------------------')
-
-rtc = RealTimeClock(tz=8, update_period=86400)
-print('RTC initialized')
-utime.sleep(3)
-print('Syncing RTC...')
-rtc.sync()
+# print current local date & time
 print(rtc.get_localdate())
 print(rtc.get_localtime())
 print('--------------------')
