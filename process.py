@@ -60,6 +60,18 @@ class Process:
             if hydrometer_dict_data.get('originalGravity'):
                 self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('originalGravity')
 
+    def _check_hydrometer_status(self):
+        """
+        check the status of the hydrometer
+        """
+        if self.hydrometer_status.get('is_online'):
+            timeout = self.hydrometer_status.get('update_interval_ms') * 2
+            last_time = self.hydrometer_status.get('last_time')
+            if utime.ticks_diff(utime.ticks_ms(), last_time) > timeout:
+                self.hydrometer_status['is_online'] = False
+                self.hydrometer_data['currentGravity'] = None
+                self.hydrometer_data['batteryLevel'] = None
+
     def _step_progress_check(self):
         """
         check the stage progress
@@ -80,18 +92,6 @@ class Process:
                 self.is_completed = True
                 self.fermenter_temp_ctrl.accomplished()
                 print('All fermentation stages have completed.')
-
-    def _check_hydrometer_status(self):
-        """
-        check the status of the hydrometer
-        """
-        if self.hydrometer_status.get('is_online'):
-            timeout = self.hydrometer_status.get('update_interval_ms') * 2
-            last_time = self.hydrometer_status.get('last_time')
-            if utime.ticks_diff(utime.ticks_ms(), last_time) > timeout:
-                self.hydrometer_status['is_online'] = False
-                self.hydrometer_data['currentGravity'] = None
-                self.hydrometer_data['batteryLevel'] = None
 
     def _process_backup(self):
         recovery_obj = self.recovery
@@ -128,7 +128,7 @@ class Process:
                 "step_percentage": step_percentage,
                 "total_percentage": total_percentage
             }
-            if sg:
+            if self.hydrometer_status.get('is_online'):
                 combined_msg = basic_msg.copy()
                 combined_msg.update({
                     "original_gravity": round(og, 3),
