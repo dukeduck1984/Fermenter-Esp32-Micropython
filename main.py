@@ -45,10 +45,13 @@ print('--------------------')
 
 # initialize and mount SD card, the front end GUI is stored in SD card
 try:
+    # try to mount SD card using MMC interface
+    uos.mount(machine.SDCard(width=1), '/sd')
+except Exception:
+    # otherwise mount SD card using SPI
+    print('Failed to mount the SD card using MMC, now attempting to mount with SPI.')
     sd = machine.SDCard(slot=2, mosi=15, miso=2, sck=14, cs=13)
     uos.mount(sd, '/sd')
-except:
-    print('Failed to initialize the SD Card')
     print('--------------------')
 else:
     print('SD Card initialized and mounted')
