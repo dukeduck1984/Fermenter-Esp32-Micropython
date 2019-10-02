@@ -79,7 +79,13 @@ class SingleTempSensor:
         if not self.ds_obj.last_reading_available:
             self.ds_obj.get_realtime_temp()
         if self.bytearray_romcode:
-            return round(self.ds_obj.ds.read_temp(self.bytearray_romcode), 1)
+            try:
+                temp = round(self.ds_obj.ds.read_temp(self.bytearray_romcode), 1)
+            except Exception as e:
+                print('The DS18 sensor was disconnected.  Check the wire.')
+                return -99.9
+            else:
+                return temp
         else:
             return -99.9
 
