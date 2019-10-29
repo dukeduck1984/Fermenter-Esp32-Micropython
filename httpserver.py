@@ -274,14 +274,14 @@ class HttpServer:
             """
             # 获取前端发来的设备序号
             sensor_dict = httpClient.ReadRequestContentAsJSON()
-            new_wort_dev_num = sensor_dict.get('wortSensorDev').get('value')
-            new_chamber_dev_num = sensor_dict.get('chamberSensorDev').get('value')
+            new_wort_romcode = sensor_dict.get('wortSensorDev').get('value')
+            new_chamber_romcode = sensor_dict.get('chamberSensorDev').get('value')
             # 获取温感对象实例
             wort_sensor = process.fermenter_temp_ctrl.wort_sensor
             chamber_sensor = process.fermenter_temp_ctrl.chamber_sensor
             # 更新温感设备序号
-            wort_sensor.update_device_num(new_wort_dev_num)
-            chamber_sensor.update_device_num(new_chamber_dev_num)
+            wort_sensor.update_romcode(new_wort_romcode)
+            chamber_sensor.update_romcode(new_chamber_romcode)
             try:
                 # 测量温度
                 wort_temp = wort_sensor.read_temp()
