@@ -98,6 +98,7 @@ class SingleTempSensor(RomCodeConvert):
         else:
             self.is_connected = False
             print('DS18B20 ' + new_romcode_hex_string + ' not connected.')
+        self.bytearray_romcode = new_romcode_bytearray
         return new_romcode_bytearray
 
     def is_connected(self):
