@@ -27,4 +27,3 @@ class FermenterPID:
 
         self.last_output = max(min(P_value + I_value + D_value, 15), -15)
         return self.last_output
-
