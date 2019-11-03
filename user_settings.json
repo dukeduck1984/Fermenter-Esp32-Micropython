@@ -1,17 +1,17 @@
 {
   "breweryName": "豚鼠精酿",
-  "wortSensorDev": 1,
-  "chamberSensorDev": 0,
+  "wortSensorDev": "0x28aaec0119130238",
+  "chamberSensorDev": "0x28aa34e41813023b",
   "apSsid": "Fermenter",
   "wifi": {
-    "ssid": "",
-    "pass": ""
+    "ssid": "IDEA CENTER",
+    "pass": "58781616"
   },
   "mqtt": {
     "enabled": false,
     "brokerAddr": "things.ubidots.com",
     "brokerPort": 1883,
-    "username": "Your-UbidotsTokenHere",
+    "username": "A1E-ULJCw8ETOOXSdxUtXvVYzjaiXaGqX0",
     "password": "",
     "topic": "/v1.6/devices/fermenter",
     "pubIntervalMs": 900000

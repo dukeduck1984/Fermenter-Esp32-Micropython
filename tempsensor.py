@@ -33,7 +33,7 @@ class Ds18Sensors(RomCodeConvert):
     def __init__(self, pin):
         """
         Initialize the DS18 temperature sensor
-        :param onewire_object: Class; the OneWireDevice instance
+        :param pin: int; GPIO for OneWire
         """
         self.ow = onewire.OneWire(machine.Pin(pin))
         self.ds = ds18x20.DS18X20(self.ow)
@@ -81,7 +81,7 @@ class SingleTempSensor(RomCodeConvert):
             self.is_connected = False
             self.ds_obj.device_list = None
             print('The DS18 sensor was disconnected.  Check the wire.')
-            return -99.9
+            return None
         else:
             self.is_connected = True
             return temp
@@ -92,8 +92,8 @@ class SingleTempSensor(RomCodeConvert):
             new_romcode_bytearray = self.from_hex_string_to_romcode(new_romcode_hex_string)
         except Exception as e:
             print(e)
-            return None
-        if new_romcode_bytearray in self.ds_obj.ds.scan():
+            new_romcode_bytearray = None
+        if new_romcode_bytearray and new_romcode_bytearray in self.ds_obj.ds.scan():
             self.is_connected = True
         else:
             self.is_connected = False
@@ -101,5 +101,5 @@ class SingleTempSensor(RomCodeConvert):
         self.bytearray_romcode = new_romcode_bytearray
         return new_romcode_bytearray
 
-    def is_connected(self):
+    def isconnected(self):
         return self.is_connected
