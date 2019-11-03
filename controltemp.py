@@ -27,9 +27,9 @@ class FermenterTempControl:
     def run(self, set_temp):
         self.set_temp = set_temp
         chamber_temp = self.get_chamber_temp()
-        if self.wort_sensor.is_connected():
+        if self.wort_sensor.isconnected():
+            self.pid.reset()
             wort_temp = self.get_wort_temp()
-
             pid_output = round(self.pid.update(wort_temp, self.set_temp), 1)
             target_chamber_temp = self.set_temp + pid_output
 
@@ -51,22 +51,39 @@ class FermenterTempControl:
             else:
                 self.cooler.off()
         else:
-            temp_delta = chamber_temp - self.set_temp
-            # temp_delta 大于 3.0 需要快速降温
-            # temp_delta 在1.0-3.0之间 需要缓慢降温
-            # temp_delta 小于 -0.3 则需要升温
-            if temp_delta > 3.0:
-                self.cooler.on()
+            self.pid.reset(kp=0.5, ki=0.001, kd=3)
+            pid_output = round(self.pid.update(chamber_temp, self.set_temp), 1)
+            target_chamber_temp = self.set_temp + pid_output
+
+            if chamber_temp is None:
                 self.heater.off()
-            elif 1.0 < temp_delta <= 3.0:
-                self.cooler.on()
+            elif chamber_temp < self.set_temp and chamber_temp < target_chamber_temp:
                 self.heater.on()
-            elif temp_delta < -0.3:
-                self.heater.on()
-                self.cooler.off()
+            elif chamber_temp >= self.set_temp or chamber_temp >= target_chamber_temp:
+                self.heater.off()
             else:
                 self.heater.off()
+
+            if chamber_temp is None:
                 self.cooler.off()
+            elif chamber_temp > (self.set_temp + 2) and chamber_temp > (target_chamber_temp + 2):
+                self.cooler.on()
+            elif chamber_temp <= (self.set_temp + 2) or chamber_temp <= (target_chamber_temp + 2):
+                self.cooler.off()
+            else:
+                self.cooler.off()
+
+            # temp_diff = chamber_temp - self.set_temp
+            # if temp_diff > 8:
+            #     self.cooler.on()
+            # elif 4 < temp_diff <= 8:
+            #     self.cooler.on()
+            #     self.heater.on()
+            # elif -2 < temp_diff <= 4:
+            #     self.cooler.off()
+            #     self.heater.off()
+            # else:
+            #     self.heater.on()
 
         # Set LED color according to actuator status
         if self.heater.is_on() and not self.cooler.is_on():

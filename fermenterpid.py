@@ -3,6 +3,9 @@ class FermenterPID:
         self.k_p = float(kp)
         self.k_i = float(ki)
         self.k_d = float(kd)
+        self.k_p_backup = self.k_p
+        self.k_i_backup = self.k_i
+        self.k_d_backup = self.k_d
         self.last_error = 0
         self.integration = 0
         self.last_output = 0
@@ -27,3 +30,13 @@ class FermenterPID:
 
         self.last_output = max(min(P_value + I_value + D_value, 15), -15)
         return self.last_output
+
+    def reset(self, kp=0, ki=0, kd=0):
+        if kp or ki or kd:
+            self.k_p = float(kp)
+            self.k_i = float(ki)
+            self.k_d = float(kd)
+        else:
+            self.k_p = self.k_p_backup
+            self.k_i = self.k_i_backup
+            self.k_d = self.k_d_backup
