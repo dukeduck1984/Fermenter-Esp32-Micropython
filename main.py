@@ -23,7 +23,6 @@ from wifi import WiFi
 
 
 logging.basicConfig(level=logging.INFO)
-logger = init_logger(__name__)
 
 # disable os debug info
 esp.osdebug(None)
@@ -43,6 +42,12 @@ settings = ujson.loads(json)
 print('File user_settings.json has been loaded!')
 print('--------------------')
 
+# initialize the LED
+led = RgbLed(r_pin=config['rgb_pins']['r_pin'], g_pin=config['rgb_pins']['g_pin'], b_pin=config['rgb_pins']['b_pin'])
+led.set_color('magenta')  # LED初始化后设置为粉色
+print('LED initialized')
+print('--------------------')
+
 # initialize and mount SD card, the front end GUI is stored in SD card
 try:
     # try to mount SD card using MMC interface
@@ -53,20 +58,26 @@ try:
 except Exception:
     # otherwise mount SD card using SPI
     print('Failed to mount the SD card using MMC, now attempting to mount with SPI.')
-    sd = machine.SDCard(slot=2, mosi=15, miso=2, sck=14, cs=13)
-    uos.mount(sd, '/sd')
-    print('--------------------')
+    try:
+        sd = machine.SDCard(slot=2, mosi=15, miso=2, sck=14, cs=13)
+        uos.mount(sd, '/sd')
+    except Exception:
+        print('Failed to mount the SD with SPI.')
+        print('--------------------')
 else:
     print('SD Card initialized and mounted')
     print('--------------------')
+
+# initialize logger
+logger = init_logger(__name__)
 
 # initialize onewire devices
 temp_sensors = Ds18Sensors(pin=config['onewire_pin'])
 utime.sleep(1)
 # initialize ds18 sensors
-wort_sensor = SingleTempSensor(temp_sensors, device_number=settings['wortSensorDev'])  # the temp sensor measures wort temperature
+wort_sensor = SingleTempSensor(temp_sensors, settings['wortSensorDev'])  # the temp sensor measures wort temperature
 utime.sleep(1)
-chamber_sensor = SingleTempSensor(temp_sensors, device_number=settings['chamberSensorDev'])  # the temp sensor measures chamber temperature
+chamber_sensor = SingleTempSensor(temp_sensors, settings['chamberSensorDev'])  # the temp sensor measures chamber temperature
 utime.sleep(1)
 print('DS18B20 sensors initialized')
 print('--------------------')
@@ -78,12 +89,6 @@ print('Cooler initialized')
 heater = Actuator(pin=config['heater_pin'],
                   interval=config['heater_interval'])  # the heater doesn't need an interval between on & off
 print('Heater initialized')
-print('--------------------')
-
-# initialize the LED
-led = RgbLed(r_pin=config['rgb_pins']['r_pin'], g_pin=config['rgb_pins']['g_pin'], b_pin=config['rgb_pins']['b_pin'])
-led.set_color('magenta')  # LED初始化后设置为粉色
-print('LED initialized')
 print('--------------------')
 
 # create a PID instance
@@ -115,7 +120,8 @@ def measure_realtime_temps():
         try:
             temp_sensors.get_realtime_temp()
         except:
-            print('Error occurs when reading temperature')
+            # print('Error occurs when reading temperature')
+            pass
 
         # update temperature readings every 2s
         utime.sleep_ms(2000)

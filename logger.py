@@ -22,6 +22,7 @@ def init_logger(logger_name, filename='sys.log'):
     :return: Logger class
     """
     import logging
+    import uos
 
     if 'sd' in uos.listdir():
         if not 'log' in uos.listdir('sd'):
