@@ -1,17 +1,17 @@
 {
-  "breweryName": "豚鼠精酿",
+  "breweryName": "My Nano Brewery",
   "wortSensorDev": "0x28aaec0119130238",
   "chamberSensorDev": "0x28aa34e41813023b",
   "apSsid": "Fermenter",
   "wifi": {
-    "ssid": "IDEA CENTER",
-    "pass": "58781616"
+    "ssid": "",
+    "pass": ""
   },
   "mqtt": {
     "enabled": false,
     "brokerAddr": "things.ubidots.com",
     "brokerPort": 1883,
-    "username": "A1E-ULJCw8ETOOXSdxUtXvVYzjaiXaGqX0",
+    "username": "Your-UbidotsTokenHere",
     "password": "",
     "topic": "/v1.6/devices/fermenter",
     "pubIntervalMs": 900000
