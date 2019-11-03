@@ -5,7 +5,11 @@
   "rgb_pins": {
     "r_pin": 27,
     "g_pin": 19,
-    "b_pin": 22
+    "b_pin": 26
+  },
+  "ssd1306_pins": {
+    "scl_pin": 22,
+    "sda_pin": 21
   },
   "cooler_interval": 300,
   "heater_interval": 0
