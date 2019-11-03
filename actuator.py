@@ -17,13 +17,12 @@ class Actuator:
         """
         val: int; 0 or 1, control the pin output
         """
-        if val == 0 or val == 1:
+        if (val == 0 and self.is_on()) or (val == 1 and not self.is_on()):
             self.actuator.value(val)
             self.last_time = utime.time()
             self.status = val == 1
         else:
             print('Invalid action!')
-            return
 
     def check_interval(self, val):
         """
