@@ -296,7 +296,7 @@ class HttpServer:
                 }
                 httpResponse.WriteResponseJSONOk(obj=temp_dict, headers=None)
 
-        @MicroWebSrv.route('/gravity', 'POST')
+        @MicroWebSrv.route('/hydrometer', 'POST')
         def gravity_post(httpClient, httpResponse):
             hydrometer_dict = httpClient.ReadRequestContentAsJSON()
             process.save_hydrometer_data(hydrometer_dict)

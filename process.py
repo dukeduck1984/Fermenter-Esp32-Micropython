@@ -32,8 +32,10 @@ class Process:
         self.step_hours = None
         self.step_target_temp = None
         self.hydrometer_data = {
+            'temp': None,
             'originalGravity': None,
             'currentGravity': None,
+            'batteryVoltage': None,
             'batteryLevel': None
         }
         self.hydrometer_status = {
@@ -51,7 +53,9 @@ class Process:
             self.hydrometer_status['is_online'] = True
             self.hydrometer_status['update_interval_ms'] = hydrometer_dict_data.get('updateIntervalMs')
             self.hydrometer_status['last_time'] = utime.ticks_ms()
+            self.hydrometer_data['temp'] = hydrometer_dict_data.get('temp')
             self.hydrometer_data['currentGravity'] = hydrometer_dict_data.get('currentGravity')
+            self.hydrometer_data['batteryVoltage'] = hydrometer_dict_data.get('battery')
             self.hydrometer_data['batteryLevel'] = hydrometer_dict_data.get('batteryLevel')
             if not self.hydrometer_data.get('originalGravity'):
                 self.hydrometer_data['originalGravity'] = hydrometer_dict_data.get('currentGravity')
