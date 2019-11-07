@@ -32,7 +32,7 @@ class Process:
         self.step_hours = None
         self.step_target_temp = None
         self.hydrometer_data = {
-            'temp': None,
+            'temperature': None,
             'originalGravity': None,
             'currentGravity': None,
             'batteryVoltage': None,
@@ -53,7 +53,7 @@ class Process:
             self.hydrometer_status['is_online'] = True
             self.hydrometer_status['update_interval_ms'] = hydrometer_dict_data.get('updateIntervalMs')
             self.hydrometer_status['last_time'] = utime.ticks_ms()
-            self.hydrometer_data['temp'] = hydrometer_dict_data.get('temp')
+            self.hydrometer_data['temperature'] = hydrometer_dict_data.get('temperature')
             self.hydrometer_data['currentGravity'] = hydrometer_dict_data.get('currentGravity')
             self.hydrometer_data['batteryVoltage'] = hydrometer_dict_data.get('battery')
             self.hydrometer_data['batteryLevel'] = hydrometer_dict_data.get('batteryLevel')
@@ -263,7 +263,7 @@ class Process:
             return {
                 'machineStatus': machine_status,  # str
                 'setTemp': target_temp,  # float
-                'wortTemp': wort_temp,  # float
+                'wortTemp': wort_temp if wort_temp is not None else self.hydrometer_data.get('temperature'),  # float
                 'chamberTemp': chamber_temp,  # float
                 'isHeating': is_heating,  # bool
                 'isCooling': is_cooling,  # bool
