@@ -3,6 +3,10 @@ import usocket
 import ustruct
 import utime
 
+from logger import init_logger
+
+logger = init_logger(__name__)
+
 
 class RealTimeClock:
     # (date(2000, 1, 1) - date(1900, 1, 1)).days * 24*60*60
@@ -61,21 +65,21 @@ class RealTimeClock:
         """
         try:
             self._settime()
-        except:
+        except Exception as e:
             if self.retry_counter < 1:
                 self.retry_counter += 1
-                print('Retrying...')
+                logger.debug('Retrying to connect to the ntp server...')
                 utime.sleep(1)
                 self.sync()
             else:
-                print('Failed to sync RTC')
+                logger.debug('Failed to sync RTC')
                 self.retry_counter = 0
         else:
             self.last_time = utime.ticks_ms()
             self.retry_counter = 0
             utc = self.rtc.datetime()
             self.rtc.datetime((utc[0], utc[1], utc[2], utc[3], utc[4] + self.tz, utc[5], utc[6], utc[7]))
-            print('RTC Synced')
+            logger.debug('RTC Synced')
 
     def sync(self):
         self._ntp_sync()

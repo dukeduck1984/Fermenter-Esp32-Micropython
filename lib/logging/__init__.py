@@ -48,7 +48,8 @@ class Logger:
 
             if self.handlers:
                 for hdlr in self.handlers:
-                    hdlr.emit(record)
+                    if level >= hdlr.level:
+                        hdlr.emit(record)
 
     def debug(self, msg, *args):
         self.log(DEBUG, msg, *args)
@@ -128,9 +129,13 @@ def basicConfig(level=INFO, filename=None, stream=None, format=None, style="%"):
 class Handler:
     def __init__(self):
         self.formatter = Formatter()
+        self.level = NOTSET
 
     def setFormatter(self, fmt):
         self.formatter = fmt
+
+    def setLevel(self, level):
+        self.level = level
 
 
 class StreamHandler(Handler):

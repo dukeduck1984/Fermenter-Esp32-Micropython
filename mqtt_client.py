@@ -2,7 +2,10 @@ import machine
 import ubinascii
 
 from umqtt.robust import MQTTClient
+from logger import init_logger
 
+
+logger = init_logger(__name__)
 
 class MQTT:
     def __init__(self, user_settings_dict):
@@ -34,8 +37,8 @@ class MQTT:
     def connect(self):
         try:
             self.client.connect()
-        except:
-            print('Failed to connect to the MQTT broker.')
+        except Exception as e:
+            logger.warning('Failed to connect to the MQTT broker.')
 
     def disconnect(self):
         self.client.disconnect()
@@ -43,8 +46,9 @@ class MQTT:
     def publish(self, str_msg):
         try:
             self.connect()
-        except:
-            pass
+        except Exception:
+            logger.warning('Failed to publish the data to the MQTT broker.')
         else:
+            logger.debug('Data have been published to the MQTT broker.')
             self.client.publish(self.topic, str_msg)
             self.disconnect()

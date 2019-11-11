@@ -27,15 +27,24 @@ def init_logger(logger_name, filename='sys.log'):
     if 'sd' in uos.listdir():
         if not 'log' in uos.listdir('sd'):
             uos.mkdir('sd/log')
-        filepath = '/sd/log/' + filename
+        filepath = 'sd/log/' + filename
     else:
         filepath = filename
 
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logger = logging.getLogger(logger_name)
-    log_file_handler = logging.FileHandler(filepath)
     log_formatter = logging.Formatter(log_format)
+
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.DEBUG)
+
+    log_file_handler = logging.FileHandler(filename=filepath)
     log_file_handler.setFormatter(log_formatter)
+    log_file_handler.setLevel(logging.INFO)
     logger.addHandler(log_file_handler)
-    
+
+    log_stream_handler = logging.StreamHandler()
+    log_stream_handler.setFormatter(log_formatter)
+    log_stream_handler.setLevel(logging.DEBUG)
+    logger.addHandler(log_stream_handler)
+
     return logger

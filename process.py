@@ -2,6 +2,10 @@ import utime
 import machine
 import ujson
 
+from logger import init_logger
+
+logger = init_logger(__name__)
+
 
 class Process:
     """
@@ -50,6 +54,7 @@ class Process:
     def save_hydrometer_data(self, hydrometer_dict_data):
         # 传入数据有updateIntervalSec代表数据来自比重计
         if hydrometer_dict_data.get('updateIntervalMs'):
+            logger.info('Hydrometer data received.')
             self.hydrometer_status['is_online'] = True
             self.hydrometer_status['update_interval_ms'] = hydrometer_dict_data.get('updateIntervalMs')
             self.hydrometer_status['last_time'] = utime.ticks_ms()
@@ -72,6 +77,7 @@ class Process:
             timeout = self.hydrometer_status.get('update_interval_ms') * 2
             last_time = self.hydrometer_status.get('last_time')
             if utime.ticks_diff(utime.ticks_ms(), last_time) > timeout:
+                logger.info('The communication with the Hydrometer has lost.')
                 self.hydrometer_status['is_online'] = False
                 self.hydrometer_data['currentGravity'] = None
                 self.hydrometer_data['batteryLevel'] = None
@@ -91,11 +97,12 @@ class Process:
                 # then proceed to next stage
                 new_step_index = self.current_step_index + 1
                 self.start(step_index=new_step_index)
+                logger.info('The previous step has completed, now proceeding to the next step.')
             # if this is the end of the final stage
             else:
                 self.is_completed = True
                 self.fermenter_temp_ctrl.accomplished()
-                print('All fermentation stages have completed.')
+                logger.info('All fermentation stages have completed.')
 
     def _process_backup(self):
         recovery_obj = self.recovery
@@ -195,8 +202,9 @@ class Process:
             self.tim.deinit()
             utime.sleep_ms(100)
             self.tim.init(period=5000, mode=machine.Timer.PERIODIC, callback=self.job_queue)
+            logger.info('The fermentation process has started.')
         else:
-            print('Load fermentation steps first!')
+            logger.info('Pls load fermentation steps before starting the process.')
 
     def abort(self):
         self.tim.deinit()
@@ -205,7 +213,7 @@ class Process:
         self.elapsed_time = None
         self.fermenter_temp_ctrl.reset()
         self.recovery.remove_backup()
-        print('Fermentation process has been terminated.')
+        logger.info('The fermentation process has been terminated by the user.')
 
     def has_started(self):
         """Check whether fermentation process is started or not

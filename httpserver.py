@@ -180,7 +180,6 @@ class HttpServer:
                 httpResponse.WriteResponseInternalServerError()
             else:
                 if wifi.is_connected():
-                    print(new_ip)
                     httpResponse.WriteResponseOk()
                 else:
                     httpResponse.WriteResponseInternalServerError()
@@ -206,14 +205,11 @@ class HttpServer:
             """
             Start FTP service
             """
-            print('Initializing FTP service...')
             try:
                 import uftpd
             except:
-                print('Failed to start FTP service.')
                 httpResponse.WriteResponseInternalServerError()
             else:
-                print('FTP service has started.')
                 httpResponse.WriteResponseOk()
 
         @MicroWebSrv.route('/mqtttest', 'POST')
@@ -228,10 +224,8 @@ class HttpServer:
                 test_mqtt = MQTT(settings_dict)
                 test_mqtt.publish(test_msg)
             except:
-                print('Failed to send the message to the MQTT broker.')
                 httpResponse.WriteResponseInternalServerError()
             else:
-                print('The test message has been sent successfully.')
                 httpResponse.WriteResponseOk()
 
         @MicroWebSrv.route('/actuator', 'POST')
@@ -300,12 +294,6 @@ class HttpServer:
         def gravity_post(httpClient, httpResponse):
             hydrometer_dict = httpClient.ReadRequestContentAsJSON()
             process.save_hydrometer_data(hydrometer_dict)
-            try:
-                print('Hydrometer data received.')
-                print('SG: ' + str(round(hydrometer_dict.get('currentGravity'), 3)))
-                print('Battery: ' + str(round(hydrometer_dict.get('batteryLevel'), 1)) + '%')
-            except:
-                pass
             httpResponse.WriteResponseOk()
 
         @MicroWebSrv.route('/chart')

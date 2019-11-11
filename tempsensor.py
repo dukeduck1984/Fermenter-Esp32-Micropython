@@ -1,6 +1,10 @@
+import ds18x20
 import machine
 import onewire
-import ds18x20
+
+from logger import init_logger
+
+logger = init_logger(__name__)
 
 
 class RomCodeConvert:
@@ -60,7 +64,8 @@ class Ds18Sensors(RomCodeConvert):
         """
         try:
             self.ds.convert_temp()
-        except:
+        except Exception as e:
+            logger.exception(e, 'Failed to read temp from DS18B20 sensors.')
             self.last_reading_available = False
         else:
             self.last_reading_available = True
@@ -68,6 +73,7 @@ class Ds18Sensors(RomCodeConvert):
 
 class SingleTempSensor(RomCodeConvert):
     def __init__(self, ds_obj, romcode_hex_string):
+        self.romcode_hex_string = romcode_hex_string
         self.ds_obj = ds_obj
         self.is_connected = False
         self.bytearray_romcode = self.update_romcode(romcode_hex_string)
@@ -78,26 +84,28 @@ class SingleTempSensor(RomCodeConvert):
         try:
             temp = round(self.ds_obj.ds.read_temp(self.bytearray_romcode), 1)
         except Exception as e:
+            if self.is_connected:
+                logger.warning('DS18B20 ' + str(self.romcode_hex_string) + ' was disconnected.  Check the wire.')
             self.is_connected = False
             self.ds_obj.device_list = None
-            print('The DS18 sensor was disconnected.  Check the wire.')
             return None
         else:
             self.is_connected = True
             return temp
 
     def update_romcode(self, new_romcode_hex_string):
+        self.romcode_hex_string = new_romcode_hex_string
         self.ds_obj.last_reading_available = False
         try:
             new_romcode_bytearray = self.from_hex_string_to_romcode(new_romcode_hex_string)
         except Exception as e:
-            print(e)
+            logger.error('Invalid Romcode.')
             new_romcode_bytearray = None
         if new_romcode_bytearray and new_romcode_bytearray in self.ds_obj.ds.scan():
             self.is_connected = True
         else:
             self.is_connected = False
-            print('DS18B20 ' + new_romcode_hex_string + ' not connected.')
+            logger.warning('DS18B20 ' + str(new_romcode_hex_string) + ' is not connected.')
         self.bytearray_romcode = new_romcode_bytearray
         return new_romcode_bytearray
 

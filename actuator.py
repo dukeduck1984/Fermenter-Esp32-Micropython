@@ -21,8 +21,6 @@ class Actuator:
             self.actuator.value(val)
             self.last_time = utime.time()
             self.status = val == 1
-        else:
-            print('Invalid action!')
 
     def check_interval(self, val):
         """
